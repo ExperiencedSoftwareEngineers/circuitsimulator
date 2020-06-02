@@ -58,7 +58,7 @@ int main()
 
 			if('0'!=line[1][0])
 			{
-				node1 = stoi(line[1].substr(1));
+				node1 = stoi(line[1].substr(1,3));
 			}
 			else
 			{
@@ -67,7 +67,7 @@ int main()
 
 			if('0'!=line[1][0])
 			{
-				node2 = stoi(line[1].substr(1));
+				node2 = stoi(line[1].substr(1,3));
 			}
 			else
 			{
@@ -88,7 +88,7 @@ int main()
 
 			if('0'!=line[1][0])
 			{
-				node1 = stoi(line[1].substr(1));
+				node1 = stoi(line[1].substr(1,3));
 			}
 			else
 			{
@@ -96,7 +96,7 @@ int main()
 			}
 			if('0'!=line[1][0])
 			{
-			int node2 = stoi(line[1].substr(1));
+			int node2 = stoi(line[1].substr(1,3));
 			}
 			else
 			{
@@ -115,7 +115,7 @@ int main()
 			int node2;
 			if('0'!=line[1][0])
 			{
-				node1 = stoi(line[1].substr(1));
+				node1 = stoi(line[1].substr(1,3));
 			}
 			else
 			{
@@ -123,7 +123,7 @@ int main()
 			}
 			if('0'!=line[1][0])
 			{
-				node2 = stoi(line[1].substr(1));
+				node2 = stoi(line[1].substr(1,3));
 			}
 			else
 			{
@@ -143,7 +143,7 @@ int main()
 
 			if('0'!=line[1][0])
 			{
-				node1 = stoi(line[1].substr(1));
+				node1 = stoi(line[1].substr(1,3));
 			}
 			else
 			{
@@ -152,7 +152,7 @@ int main()
 
 			if('0'!=line[1][0])
 			{
-			int node2 = stoi(line[1].substr(1));
+			int node2 = stoi(line[1].substr(1,3));
 			}
 
 			else
