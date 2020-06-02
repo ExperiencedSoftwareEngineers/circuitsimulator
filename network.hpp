@@ -11,7 +11,9 @@
 
 using namespace std;
 
-class Network{}
+class Network{
+    vector<Component> parts;
+}
 
 class Component{
     string name; // name, e.g. R1, C3, etc.
@@ -20,23 +22,27 @@ class Component{
 
 class Resistor : public Component {
     float value;
-};
+}
+
 class Inductor : public Component {
     float value;
-};
+}
+
 class Capacitor : public Component {
     float value;
-};
+}
+
 class Voltage : public Component {
     float amplitude;
     float frequency;
     float offset;
-};
+}
+
 class Current : public Component {
     float amplitude;
     float frequency;
     float offset;
-};
+}
 
 //not compulsory bc it's *"advanced"*
 class Diode : public Component {};
