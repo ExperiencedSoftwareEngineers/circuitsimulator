@@ -14,7 +14,7 @@ using namespace std;
 class Network{
 	public:
     vector<Component> parts;
-	float stop; //stop time of the transient analysis
+	float stop; //stop time of the transient analysis.
 	float step; //time between intervals
 	
 };
