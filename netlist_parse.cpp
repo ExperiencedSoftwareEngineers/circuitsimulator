@@ -45,11 +45,14 @@ vector<string> troy()
 }
 
 int main(){
-
-    vector<string> cabbage = troy();
-    
-    for (int i = 0; i < cabbage.size(); i++)
-     {
-        cout<< cabbage[i] << endl;
-     }
+    vector<string> line;
+    while(!cin.fail()){
+        line 
+        /*vector<string> cabbage = troy();
+        
+        for (int i = 0; i < cabbage.size(); i++)
+        {
+            cout<< cabbage[i] << endl;
+        }*/
+    }
 }
