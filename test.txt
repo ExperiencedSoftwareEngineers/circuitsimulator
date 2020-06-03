@@ -1,1 +1,4 @@
-test lol
+R1 N001 N003 1K
+C1 N001 0 1u
+.tran 0 10ms 0 1us
+.end
