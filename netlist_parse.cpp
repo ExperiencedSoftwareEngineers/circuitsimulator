@@ -1,4 +1,4 @@
-// #include "network.hpp"
+#include "network.hpp"
 
 #include <vector>
 #include <string>
@@ -45,67 +45,64 @@ vector<string> troy()
 }
 
 int main(){
-    vector<string> line;
+    	vector<string> line;
 	Network chad;
-    while(!cin.fail()){
+	bool end = true;
+	int node1;
+	int node2;
+    while(end){
         line = troy();
+
+	if('0'!=line[1][0])
+	node1 = stoi(line[1].substr(1));
+	else  node1 = 0;
+	if('0'!=line[1][0])
+	node2 = stoi(line[1].substr(1));
+	else  node2 = 0;
+	Component comp;
+	vector<int> inputnodes{node1,node2};
 	if (line[0][0] == 'R')
-	{
-		if('0'!=line[1][0])
-		int node1 = stoi(line[1].substr(1));
-		else node1 = 0;
-		if('0'!=line[1][0])
-		int node2 = stoi(line[1].substr(1));
-		else node2 = 0;
-
-		vector<int> inputnodes{node1,node2};
-		Component lol = Resistor(line[0], inputnodes, line[3]);
-
-		chad.parts.push_back(lol);
+	{		
+		comp = Resistor(line[0], inputnodes, stof(line[3]));
         }
-	if (line[0][0] == 'L')
+	else if (line[0][0] == 'L')
 	{
-		if('0'!=line[1][0])
-		int node1 = stoi(line[1].substr(1));
-		else node1 = 0;
-		if('0'!=line[1][0])
-		int node2 = stoi(line[1].substr(1));
-		else node2 = 0;
-
-		vector<int> inputnodes{node1,node2};
-		Component lol = Inductor(line[0], inputnodes, line[3]);
-
-		chad.parts.push_back(lol);
+		comp = Inductor(line[0], inputnodes, stof(line[3]));
         }
-	if (line[0][0] == 'C')
+	else if (line[0][0] == 'C')
 	{
-		if('0'!=line[1][0])
-		int node1 = stoi(line[1].substr(1));
-		else node1 = 0;
-		if('0'!=line[1][0])
-		int node2 = stoi(line[1].substr(1));
-		else node2 = 0;
-
-		vector<int> inputnodes{node1,node2};
-		Component lol = Capacitor(line[0], inputnodes, line[3]);
-
-		chad.parts.push_back(lol);
+		comp = Capacitor(line[0], inputnodes, stof(line[3]));
         }
-	if (line[0][0] == 'V')
+	else if (line[0][0] == 'V')
 	{
-		if('0'!=line[1][0])
-		int node1 = stoi(line[1].substr(1));
-		else node1 = 0;
-		if('0'!=line[1][0])
-		int node2 = stoi(line[1].substr(1));
-		else node2 = 0;
-
-		vector<int> inputnodes{node1,node2};
-		Component lol = Voltage(line[0], inputnodes, stoi(line[3].substr(5)), line[5], stoi(line[5].substr(0,(line[5].length())-1);
-
-		chad.parts.push_back(lol);
+		//if(line[3][0]=='S')
+		comp = VoltageAC(line[0], inputnodes, stof(line[3].substr(5)), stof(line[4]), stof(line[5].substr(0,(line[5].length())-1)));
+		//else
+		//comp = VoltageDC(line[0], inputnodes, stof(line[3]));
         }
+	else if (line[0][0] == 'I')
+	{
+		//if(line[3][0]=='S')
+		comp = CurrentAC(line[0], inputnodes, stof(line[3].substr(5)), stof(line[4]), stof(line[5].substr(0,(line[5].length())-1)));
+		//else
+		//comp = CurrentDC(line[0], inputnodes, stof(line[3]));
+        }
+	else if (line[0] == ".tran")
+	{
+		chad.stop = stof(line[2]);
+		chad.stop = stof(line[4]);
+	}
+	else if ((line[0]==".end")||(cin.fail()))
+	{
+		end = false;
+	}
+	chad.parts.push_back(comp);
     }
+	//cout << chad.parts[0].name;
+	/*for(int i = 0; i < chad.parts.size(); i++)
+	{
+		cout << chad.parts[i].name << endl;
+	}*/
 }/*vector<string> cabbage = troy();
         
         for (int i = 0; i < cabbage.size(); i++)

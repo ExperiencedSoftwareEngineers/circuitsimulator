@@ -11,13 +11,7 @@
 
 using namespace std;
 
-class Network{
-	public:
-    vector<Component> parts;
-	float stop; //stop time of the transient analysis
-	float step; //time between intervals
-	
-};
+
 
 class Component{
 	public:
@@ -59,9 +53,20 @@ public:
     float value;
 };
 
-class Voltage : public Component {
+class VoltageDC : public Component {
 public:
-	Voltage(string na, vector<int> no, float amp, float fre, float off)
+	VoltageDC(string na, vector<int> no, float val)
+	{
+		name = na;
+		nodes = no;
+		value = val;
+	}
+    float value;
+};
+
+class VoltageAC : public Component {
+public:
+	VoltageAC(string na, vector<int> no, float amp, float fre, float off)
 	{
 		name = na;
 		nodes = no;
@@ -74,9 +79,20 @@ public:
     float offset;
 };
 
-class Current : public Component {
+class CurrentDC : public Component {
 public:
-	Current(string na, vector<int> no, float amp, float fre, float off)
+	CurrentDC(string na, vector<int> no, float val)
+	{
+		name = na;
+		nodes = no;
+		value = val;
+	}
+    float value;
+};
+
+class CurrentAC : public Component {
+public:
+	CurrentAC(string na, vector<int> no, float amp, float fre, float off)
 	{
 		name = na;
 		nodes = no;
@@ -87,6 +103,14 @@ public:
     float amplitude;
     float frequency;
     float offset;
+};
+
+class Network{
+	public:
+    vector<Component> parts;
+	float stop; //stop time of the transient analysis
+	float step; //time between intervals
+	
 };
 
 //not compulsory bc it's *"advanced"*
