@@ -60,8 +60,11 @@ int main()
 			if('0'!=line[1][0])
 			node1 = stoi(line[1].substr(1));
 			else  node1 = 0;
-			if('0'!=line[1][0])
-			node2 = stoi(line[1].substr(1));
+			if('0'!=line[2][0])
+			{
+			//cout << line[2].substr(1)<<endl;
+			node2 = stoi(line[2].substr(1));
+			}
 			else  node2 = 0;
 		}
 	
@@ -113,11 +116,11 @@ int main()
 
     }
 	
-	// cout << chad.parts[0].name;
-	for(int i = 0; i < chad.parts.size(); i++)
-	{
-		cout << chad.parts[i].name << endl;
-	}
+	cout << chad.parts[0].offset;
+	// for(int i = 0; i < chad.parts.size(); i++)
+	// {
+	// 	cout << chad.parts[i].value << endl;
+	// }
 }
 
 // vector<string> cabbage = troy();

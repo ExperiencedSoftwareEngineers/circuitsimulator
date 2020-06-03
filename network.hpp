@@ -16,6 +16,10 @@ class Component{
 	public:
     string name; // name, e.g. R1, C3, etc.
     vector<int> nodes; // vector containing the 2 nodes of the component
+	float amplitude;
+    float frequency;
+    float offset;
+	float value;
 };
 
 class Resistor : public Component {
@@ -27,7 +31,7 @@ public:
 		value = val;
 	}
 
-    float value;
+    // float value;
 };
 
 class Inductor : public Component {
@@ -38,7 +42,7 @@ public:
 		nodes = no;
 		value = val;
 	}
-    float value;
+    // float value;
 };
 
 class Capacitor : public Component {
@@ -49,7 +53,7 @@ public:
 		nodes = no;
 		value = val;
 	}
-    float value;
+    // float value;
 };
 
 class VoltageDC : public Component {
@@ -60,7 +64,7 @@ public:
 		nodes = no;
 		value = val;
 	}
-    float value;
+    // float value;
 };
 
 class VoltageAC : public Component {
@@ -73,9 +77,9 @@ public:
 		frequency = fre;
 		offset = off;
 	}
-    float amplitude;
-    float frequency;
-    float offset;
+    // float amplitude;
+    // float frequency;
+    // float offset;
 };
 
 class CurrentDC : public Component {
@@ -86,7 +90,7 @@ public:
 		nodes = no;
 		value = val;
 	}
-    float value;
+    // float value;
 };
 
 class CurrentAC : public Component {
@@ -99,9 +103,9 @@ public:
 		frequency = fre;
 		offset = off;
 	}
-    float amplitude;
-    float frequency;
-    float offset;
+    // float amplitude;
+    // float frequency;
+    // float offset;
 };
 
 class Network{
