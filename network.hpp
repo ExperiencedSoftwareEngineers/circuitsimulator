@@ -20,6 +20,7 @@ class Component{
     float frequency;
     float offset;
 	float value;
+	char type;
 };
 
 class Resistor : public Component {
@@ -30,7 +31,7 @@ public:
 		nodes = no;
 		value = val;
 	}
-
+	type = 'R';
     // float value;
 };
 
@@ -42,6 +43,7 @@ public:
 		nodes = no;
 		value = val;
 	}
+	type = 'L';
     // float value;
 };
 
@@ -53,6 +55,7 @@ public:
 		nodes = no;
 		value = val;
 	}
+	type = 'C';
     // float value;
 };
 
@@ -64,6 +67,7 @@ public:
 		nodes = no;
 		value = val;
 	}
+	type = 'V';
     // float value;
 };
 
@@ -77,6 +81,7 @@ public:
 		frequency = fre;
 		offset = off;
 	}
+	type = 'W';
     // float amplitude;
     // float frequency;
     // float offset;
@@ -90,6 +95,7 @@ public:
 		nodes = no;
 		value = val;
 	}
+	type = 'I';
     // float value;
 };
 
@@ -103,6 +109,7 @@ public:
 		frequency = fre;
 		offset = off;
 	}
+	type = 'J';
     // float amplitude;
     // float frequency;
     // float offset;

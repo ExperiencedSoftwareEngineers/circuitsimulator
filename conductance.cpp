@@ -1,0 +1,94 @@
+#include "netlist_parse.hpp"
+#include <eigen3/Eigen/Dense>
+#include <iostream>
+#include <cmath>
+
+using namespace Eigen;
+
+vector<int> sortandmerge(Network netw)
+{
+	vector<int> biglist;
+	for(int i = 0; i < netw.parts.size(); i++)
+	{
+		for(int a = 0; a < netw.parts[i].nodes.size(); a++)
+		{
+			biglist.push_back(netw.parts[i].nodes[a]);
+		}
+	}
+	sort(biglist.begin(), biglist.end());
+	biglist.erase(unique(biglist.begin(), biglist.end()),biglist.end());
+	return biglist;
+}
+
+vector<Component> listfornode(Network netw, int node)
+{
+	vector<Component> output;
+	for(int i = 0; i < netw.parts.size(); i++)
+	{
+		for(int a = 0; a < netw.parts[i].nodes.size(); a++)
+		{
+			if(netw.parts[i].nodes[a] == node)
+			{
+				output.push_back(netw.parts[i]);
+			}
+		}
+	}
+	return output;
+}
+
+vector<Component> betweennodes(Network netw, int node1, int node2)
+{
+	vector<Component> input = listfornode(netw, node1);
+	vector<Component> output;
+	for(int i = 0; i < input.size(); i++)
+	{
+		for(int a = 0; a < input[i].nodes.size(); a++)
+		{
+			if(input[i].nodes[a] == node2)
+			{
+				output.push_back(input[i]);
+			}
+		}
+	}
+	return output;
+}
+
+
+pair<MatrixXf,VectorXf) condmatrix(Network netw, float time)
+{
+	vector<Component> list = netw.parts;
+	vector<int> nodes = sortandmerge(netw);
+	MatrixXf matrix(nodes.size()-1, nodes.size()-1);
+	VectorXf curvec(nodes.size()-1);
+	for(int i = 1; i < nodes.size(); i++)//iterating row
+	{
+		vector<Component> nodecom = listfornode(netw, nodes[i]);
+		bool other = true;
+		float voltage = 0;
+		for(int a = 1; a < nodecom.size(); a++)
+		{
+			if(nodecom[a].type == 'V')
+			{
+				voltage += nodecom[a].value;
+			}
+			if(nodecom[a].type == 'W')
+			{
+				voltage += nodecom[a].offset + nodecom[a].amplitude * ;
+			}
+		} 
+		for(int a = 1; a < nodes.size(); a++)//columns
+		{
+			
+		}
+	}
+}
+
+int main()
+{
+	Network n = parseNetwork();
+	vector<int> output = sortandmerge(n);
+	for(int i = 0; i < output.size(); i++)
+	{
+		cout << output[i]<< endl;
+	}	
+}
