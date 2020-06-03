@@ -12,7 +12,6 @@
 using namespace std;
 
 
-
 class Component{
 	public:
     string name; // name, e.g. R1, C3, etc.

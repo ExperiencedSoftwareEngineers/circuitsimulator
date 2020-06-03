@@ -44,68 +44,87 @@ vector<string> troy()
     return vector_line;
 }
 
-int main(){
-    	vector<string> line;
+int main()
+{
+    vector<string> line;
 	Network chad;
 	bool end = true;
 	int node1;
 	int node2;
-    while(end){
+    while(end)
+	{
         line = troy();
+		
+		if (line[0][0] != '.')
+		{
+			if('0'!=line[1][0])
+			node1 = stoi(line[1].substr(1));
+			else  node1 = 0;
+			if('0'!=line[1][0])
+			node2 = stoi(line[1].substr(1));
+			else  node2 = 0;
+		}
+	
+		Component comp;
+		vector<int> inputnodes{node1,node2};
 
-	if('0'!=line[1][0])
-	node1 = stoi(line[1].substr(1));
-	else  node1 = 0;
-	if('0'!=line[1][0])
-	node2 = stoi(line[1].substr(1));
-	else  node2 = 0;
-	Component comp;
-	vector<int> inputnodes{node1,node2};
-	if (line[0][0] == 'R')
-	{		
-		comp = Resistor(line[0], inputnodes, stof(line[3]));
-        }
-	else if (line[0][0] == 'L')
-	{
-		comp = Inductor(line[0], inputnodes, stof(line[3]));
-        }
-	else if (line[0][0] == 'C')
-	{
-		comp = Capacitor(line[0], inputnodes, stof(line[3]));
-        }
-	else if (line[0][0] == 'V')
-	{
-		//if(line[3][0]=='S')
-		comp = VoltageAC(line[0], inputnodes, stof(line[3].substr(5)), stof(line[4]), stof(line[5].substr(0,(line[5].length())-1)));
-		//else
-		//comp = VoltageDC(line[0], inputnodes, stof(line[3]));
-        }
-	else if (line[0][0] == 'I')
-	{
-		//if(line[3][0]=='S')
-		comp = CurrentAC(line[0], inputnodes, stof(line[3].substr(5)), stof(line[4]), stof(line[5].substr(0,(line[5].length())-1)));
-		//else
-		//comp = CurrentDC(line[0], inputnodes, stof(line[3]));
-        }
-	else if (line[0] == ".tran")
-	{
-		chad.stop = stof(line[2]);
-		chad.stop = stof(line[4]);
-	}
-	else if ((line[0]==".end")||(cin.fail()))
-	{
-		end = false;
-	}
-	chad.parts.push_back(comp);
+		if (line[0][0] == 'R')
+		{		
+			comp = Resistor(line[0], inputnodes, stof(line[3]));
+			chad.parts.push_back(comp);
+		}
+		else if (line[0][0] == 'L')
+		{
+			comp = Inductor(line[0], inputnodes, stof(line[3]));
+			chad.parts.push_back(comp);
+		}
+		else if (line[0][0] == 'C')
+		{
+			comp = Capacitor(line[0], inputnodes, stof(line[3]));
+			chad.parts.push_back(comp);
+		}
+		else if (line[0][0] == 'V')
+		{
+			if(line[3][0]=='S')
+			comp = VoltageAC(line[0], inputnodes, stof(line[3].substr(5)), stof(line[4]), stof(line[5].substr(0,(line[5].length())-1)));
+			else
+			comp = VoltageDC(line[0], inputnodes, stof(line[3]));
+			chad.parts.push_back(comp);
+		}
+		else if (line[0][0] == 'I')
+		{
+			if(line[3][0]=='S')
+			comp = CurrentAC(line[0], inputnodes, stof(line[3].substr(5)), stof(line[4]), stof(line[5].substr(0,(line[5].length())-1)));
+			else
+			comp = CurrentDC(line[0], inputnodes, stof(line[3]));
+			chad.parts.push_back(comp);
+		}
+		else if (line[0] == ".tran")
+		{
+			chad.stop = stof(line[2]);
+			chad.stop = stof(line[4]);
+		}
+		else if ((line[0]==".end")||(cin.fail()))
+		{
+			end = false;
+		}
+
+		
+
     }
-	//cout << chad.parts[0].name;
-	/*for(int i = 0; i < chad.parts.size(); i++)
+	
+	// cout << chad.parts[0].name;
+	for(int i = 0; i < chad.parts.size(); i++)
 	{
 		cout << chad.parts[i].name << endl;
-	}*/
-}/*vector<string> cabbage = troy();
+	}
+}
+
+// vector<string> cabbage = troy();
         
-        for (int i = 0; i < cabbage.size(); i++)
-        {
-            cout<< cabbage[i] << endl;
-        }*/
+//         for (int i = 0; i < cabbage.size(); i++)
+//         {
+//             cout<< cabbage[i] << endl;
+//         }
+
+// }
