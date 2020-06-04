@@ -94,6 +94,7 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw)
 	MatrixXf matrix(nodes.size()-1, nodes.size()-1); // define the conductance matrix and voltage vector
 	matrix = MatrixXf::Zero(nodes.size()-1, nodes.size()-1);
 	VectorXf curvec(nodes.size()-1); // define current vector
+	curvec = VectorXf::Zero(nodes.size()-1);
 
 
 	for(int i = 0; i < components.size(); i++) // loop through all components in circuit
