@@ -65,7 +65,6 @@ Network parseNetwork()
 			else  node1 = 0;
 			if('0'!=line[2][0])
 			{
-			//cout << line[2].substr(1)<<endl;
 			node2 = stoi(line[2].substr(1));
 			}
 			else  node2 = 0;
@@ -100,7 +99,9 @@ Network parseNetwork()
 		else if (line[0][0] == 'I')
 		{
 			if(line[3][0]=='S')
+			{
 			comp = CurrentAC(line[0], inputnodes, stof(line[3].substr(5)), stof(line[4]), stof(line[5].substr(0,(line[5].length())-1)));
+			}
 			else
 			comp = CurrentDC(line[0], inputnodes, stof(line[3]));
 			chad.parts.push_back(comp);

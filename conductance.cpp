@@ -104,7 +104,7 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 		float value = 0;
 		if((components[i].flavour == 'W')||(components[i].flavour == 'J'))
 		{
-			value = components[i].offset + (components[i].amplitude * sin(components[i].frequency * time));
+			value = components[i].offset + (components[i].amplitude * sin(components[i].frequency * 2 * M_PI * time));
 		}
 		else
 		{
@@ -157,7 +157,8 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 
 		if((components[i].flavour == 'W')||(components[i].flavour == 'J'))
 		{
-			value = components[i].offset + (components[i].amplitude * sin(components[i].frequency * time));
+			value = components[i].offset + (components[i].amplitude * sin(components[i].frequency * 2* M_PI* time));
+			//cout << "value: " << value << endl;
 		}
 		else
 		{
@@ -241,6 +242,8 @@ int main()
 {
 	Network n = parseNetwork();
 	vector<int> output = sortandmerge(n);
+	// VectorXf printed = solmatrix(n, 0.01);
+	// cout << printed << endl;
 	//cout << n.stop << endl << n.step;
 	vector<VectorXf> printed = simulate(n);
 	for(int i = 0; i < printed.size(); i++)
