@@ -73,7 +73,7 @@ public:
 
 class VoltageAC : public Component {
 public:
-	VoltageAC(string na, vector<int> no, float amp, float fre, float off)
+	VoltageAC(string na, vector<int> no, float off, float amp, float fre)
 	{
 		name = na;
 		nodes = no;
@@ -101,7 +101,7 @@ public:
 
 class CurrentAC : public Component {
 public:
-	CurrentAC(string na, vector<int> no, float amp, float fre, float off)
+	CurrentAC(string na, vector<int> no, float off, float amp, float fre)
 	{
 		name = na;
 		nodes = no;
