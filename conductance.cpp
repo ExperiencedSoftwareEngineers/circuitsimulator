@@ -225,10 +225,26 @@ VectorXf solmatrix(Network netw, float time)
 	return volvec;
 }
 
+vector<VectorXf> simulate(Network netw)
+{
+	vector<VectorXf> output;
+	float stop = netw.stop;
+	float step = netw.step;
+	for(float i = 0; i <= stop; i += step)
+	{
+		output.push_back(solmatrix(netw,i));
+	}
+	return output;		
+}
+
 int main()
 {
 	Network n = parseNetwork();
 	vector<int> output = sortandmerge(n);
-	cou
-	//cout << solmatrix(n,0) << endl;
+	//cout << n.stop << endl << n.step;
+	vector<VectorXf> printed = simulate(n);
+	for(int i = 0; i < printed.size(); i++)
+	{	
+		cout << printed[i] << endl << endl;
+	}
 }
