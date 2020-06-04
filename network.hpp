@@ -20,7 +20,7 @@ class Component{
     float frequency;
     float offset;
 	float value;
-	char type;
+	char flavour;
 };
 
 class Resistor : public Component {
@@ -30,8 +30,8 @@ public:
 		name = na;
 		nodes = no;
 		value = val;
+		flavour = 'R';
 	}
-	type = 'R';
     // float value;
 };
 
@@ -42,8 +42,8 @@ public:
 		name = na;
 		nodes = no;
 		value = val;
+		flavour = 'L';
 	}
-	type = 'L';
     // float value;
 };
 
@@ -54,8 +54,8 @@ public:
 		name = na;
 		nodes = no;
 		value = val;
+		flavour = 'C';
 	}
-	type = 'C';
     // float value;
 };
 
@@ -66,8 +66,8 @@ public:
 		name = na;
 		nodes = no;
 		value = val;
+		flavour = 'V';
 	}
-	type = 'V';
     // float value;
 };
 
@@ -80,8 +80,8 @@ public:
 		amplitude = amp;
 		frequency = fre;
 		offset = off;
+		flavour = 'W';
 	}
-	type = 'W';
     // float amplitude;
     // float frequency;
     // float offset;
@@ -94,8 +94,8 @@ public:
 		name = na;
 		nodes = no;
 		value = val;
+		flavour = 'I';
 	}
-	type = 'I';
     // float value;
 };
 
@@ -108,8 +108,8 @@ public:
 		amplitude = amp;
 		frequency = fre;
 		offset = off;
+		flavour = 'J';
 	}
-	type = 'J';
     // float amplitude;
     // float frequency;
     // float offset;

@@ -67,11 +67,11 @@ vector<Component> betweennodes(Network netw, int node1, int node2)
 // 		float voltage = 0;
 // 		for(int a = 1; a < nodecom.size(); a++)
 // 		{
-// 			if(nodecom[a].type == 'V')
+// 			if(nodecom[a].flavour == 'V')
 // 			{
 // 				voltage += nodecom[a].value;
 // 			}
-// 			if(nodecom[a].type == 'W')
+// 			if(nodecom[a].flavour == 'W')
 // 			{
 // 				voltage += nodecom[a].offset + nodecom[a].amplitude * ;
 // 			}
@@ -85,15 +85,16 @@ vector<Component> betweennodes(Network netw, int node1, int node2)
 
 
 
-pair<MatrixXf,VectorXf) condmatrix(Network netw)
+pair<MatrixXf,VectorXf> condmatrix(Network netw)
 {
 	vector<Component> components = netw.parts; // list of all components in circuit
 	vector<int> nodes = sortandmerge(netw); // list of all nodes in netlist
 
 
 	MatrixXf matrix(nodes.size()-1, nodes.size()-1); // define the conductance matrix and voltage vector
-	VectorXf curvec(nodes.size()-1); // define voltge vector
-	VectorXf rhs(nodes.size()-1); // define vector on right hand side of eqn
+	matrix = MatrixXf::Zero(nodes.size()-1, nodes.size()-1);
+	VectorXf curvec(nodes.size()-1); // define current vector
+	curvec = VectorXf::Zero(nodes.size()-1);
 
 
 	for(int i = 0; i < components.size(); i++) // loop through all components in circuit
@@ -103,7 +104,7 @@ pair<MatrixXf,VectorXf) condmatrix(Network netw)
 
 		float value = components[i].value; //for resistors, inductors, capacitors and dc sources
 
-		if(components[i].type == 'R')
+		if(components[i].flavour == 'R')
 		{
 			//diagonal, addition of all conductances attached to node
 
@@ -124,19 +125,77 @@ pair<MatrixXf,VectorXf) condmatrix(Network netw)
 				matrix(node0 -1, node1 -1) += -1/value;	//since G12 = G21 
 			}
 		}
-		else if(components[i].type == 'I') //for DC current sources
+		else if(components[i].flavour == 'I') //for DC current sources
 		{
 			if(node1 != 0)
 			{
-				rhs(node1 - 1) += -value; //defined +ve current as flowing from node0 to node1
+				curvec(node1 - 1) += -value; //defined +ve current as flowing from node0 to node1
 			}
 			if(node0 != 0)
 			{
-				rhs(node0 - 1) += value;
+				curvec(node0 - 1) += value;
 			}
 		}
 	}
+
+	vector<bool> changed;
+	for(int i = 0; i < nodes.size(); i++){
+		changed.push_back(0); //note this is a bool, not a number
+	}
+
+	for(int i = 0; i < components.size(); i++){
 		
+		int node1 = components[i].nodes[0];
+		int node0 = components[i].nodes[1];
+
+		float value = components[i].value; //for resistors, inductors, capacitors and dc sources
+
+		if(components[i].flavour == 'V'){
+
+			if(node1 != 0)
+			{
+				if(!changed[node1 - 1] && node1 != 0)
+				{
+					matrix.row(node1 - 1).setZero();
+					curvec(node1 - 1) = 0;
+					changed[node1 -1] = true;
+				}
+			}
+			if(node0 != 0)
+			{
+				if(!changed[node0 - 1] && node0 != 0)
+				{
+					matrix.row(node0 - 1).setZero();
+					curvec(node0 - 1) = 0;
+					changed[node0 - 1] = true;
+				}
+			}
+			if(node0 == 0)
+			{
+				matrix(node1 - 1, node1 - 1) += 1;
+				curvec(node1 - 1) += value;
+			}
+			if(node1 == 0)
+			{
+				matrix(node0 - 1, node0 - 1) += 1;
+				curvec(node0 - 1) -= value;
+			}
+			if((node1 != 0) && (node0 != 0))
+			{
+				matrix(node1 - 1, node1 - 1) += 1;
+				matrix(node1 - 1, node0 - 1) -= 1;
+
+				matrix(node0 - 1, node0 - 1) += 1;
+				matrix(node0 - 1, node1 - 1) -= 1;
+
+				curvec(node0 - 1) -= value;
+				curvec(node1 - 1) += value;
+			}
+		}
+
+	}
+ 
+	return make_pair(matrix, curvec);
 }
 
 
@@ -144,8 +203,7 @@ int main()
 {
 	Network n = parseNetwork();
 	vector<int> output = sortandmerge(n);
-	for(int i = 0; i < output.size(); i++)
-	{
-		cout << output[i]<< endl;
-	}	
+	
+	cout << condmatrix(n).first << endl;
+	cout << condmatrix(n).second << endl;
 }
