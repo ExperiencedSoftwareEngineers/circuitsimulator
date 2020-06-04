@@ -212,12 +212,23 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 	return make_pair(matrix, curvec);
 }
 
+VectorXf solmatrix(Network netw, float time)
+{
+	pair<MatrixXf,VectorXf> evans = condmatrix(netw, time);
+	MatrixXf condmat = evans.first;
+	cout << condmat << endl;
+	VectorXf curvec = evans.second;
+	cout << curvec << endl;
+	MatrixXf incondmat = condmat.inverse();
+	cout << incondmat << endl;
+	VectorXf volvec = incondmat * curvec;
+	return volvec;
+}
 
 int main()
 {
 	Network n = parseNetwork();
 	vector<int> output = sortandmerge(n);
 	
-	cout << condmatrix(n).first << endl;
-	cout << condmatrix(n).second << endl;
+	cout << solmatrix(n,0) << endl;
 }
