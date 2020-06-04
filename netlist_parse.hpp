@@ -108,7 +108,7 @@ Network parseNetwork()
 		else if (line[0] == ".tran")
 		{
 			chad.stop = stof(line[2]);
-			chad.stop = stof(line[4]);
+			chad.step = stof(line[4]);
 		}
 		else if ((line[0]==".end")||(cin.fail()))
 		{
