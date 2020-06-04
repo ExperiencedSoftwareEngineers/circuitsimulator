@@ -67,11 +67,11 @@ vector<Component> betweennodes(Network netw, int node1, int node2)
 // 		float voltage = 0;
 // 		for(int a = 1; a < nodecom.size(); a++)
 // 		{
-// 			if(nodecom[a].type == 'V')
+// 			if(nodecom[a].flavour == 'V')
 // 			{
 // 				voltage += nodecom[a].value;
 // 			}
-// 			if(nodecom[a].type == 'W')
+// 			if(nodecom[a].flavour == 'W')
 // 			{
 // 				voltage += nodecom[a].offset + nodecom[a].amplitude * ;
 // 			}
@@ -85,13 +85,14 @@ vector<Component> betweennodes(Network netw, int node1, int node2)
 
 
 
-pair<MatrixXf,VectorXf) condmatrix(Network netw)
+pair<MatrixXf,VectorXf> condmatrix(Network netw)
 {
 	vector<Component> components = netw.parts; // list of all components in circuit
 	vector<int> nodes = sortandmerge(netw); // list of all nodes in netlist
 
 
 	MatrixXf matrix(nodes.size()-1, nodes.size()-1); // define the conductance matrix and voltage vector
+	matrix = MatrixXf::Zero(nodes.size()-1, nodes.size()-1);
 	VectorXf curvec(nodes.size()-1); // define current vector
 
 
@@ -102,7 +103,7 @@ pair<MatrixXf,VectorXf) condmatrix(Network netw)
 
 		float value = components[i].value; //for resistors, inductors, capacitors and dc sources
 
-		if(components[i].type == 'R')
+		if(components[i].flavour == 'R')
 		{
 			//diagonal, addition of all conductances attached to node
 
@@ -123,7 +124,7 @@ pair<MatrixXf,VectorXf) condmatrix(Network netw)
 				matrix(node0 -1, node1 -1) += -1/value;	//since G12 = G21 
 			}
 		}
-		else if(components[i].type == 'I') //for DC current sources
+		else if(components[i].flavour == 'I') //for DC current sources
 		{
 			if(node1 != 0)
 			{
@@ -135,15 +136,15 @@ pair<MatrixXf,VectorXf) condmatrix(Network netw)
 			}
 		}
 	}
-		
+ 
+	return make_pair(matrix, curvec);	//may or may not be the right way round
 }
 
 int main()
 {
 	Network n = parseNetwork();
 	vector<int> output = sortandmerge(n);
-	for(int i = 0; i < output.size(); i++)
-	{
-		cout << output[i]<< endl;
-	}	
+	
+	cout << condmatrix(n).first << endl;
+	cout << condmatrix(n).second << endl;
 }
