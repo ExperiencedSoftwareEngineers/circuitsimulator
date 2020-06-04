@@ -92,12 +92,13 @@ pair<MatrixXf,VectorXf) condmatrix(Network netw)
 
 
 	MatrixXf matrix(nodes.size()-1, nodes.size()-1); // define the conductance matrix and voltage vector
-	VectorXf curvec(nodes.size()-1);
+	VectorXf curvec(nodes.size()-1); // define voltge vector
+	VectorXf rhs(nodes.size()-1); // define vector on right hand side of eqn
 
 
-	for(int i = 0; i < components.size(); i++)
+	for(int i = 0; i < components.size(); i++) // loop through all components in circuit
 	{
-		int node0 = components[i].nodes[0];
+		int node1 = components[i].nodes[0];
 		int node0 = components[i].nodes[1];
 
 		float value = components[i].value; //for resistors, inductors, capacitors and dc sources
@@ -121,6 +122,17 @@ pair<MatrixXf,VectorXf) condmatrix(Network netw)
 			{
 				matrix(node1 -1, node0 -1) += -1/value; //eg if node0 = 1 and node1 = 2 there must be a direct connection so G21 is -1/value
 				matrix(node0 -1, node1 -1) += -1/value;	//since G12 = G21 
+			}
+		}
+		else if(components[i].type == 'I') //for DC current sources
+		{
+			if(node1 != 0)
+			{
+				rhs(node1 - 1) += -value; //defined +ve current as flowing from node0 to node1
+			}
+			if(node0 != 0)
+			{
+				rhs(node0 - 1) += value;
 			}
 		}
 	}
