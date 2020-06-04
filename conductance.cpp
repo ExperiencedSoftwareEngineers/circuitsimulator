@@ -137,8 +137,65 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw)
 			}
 		}
 	}
+
+	vector<bool> changed;
+	for(int i = 0; i < nodes.size(); i++){
+		changed.push_back(0); //note this is a bool, not a number
+	}
+
+	for(int i = 0; i < components.size(); i++){
+		
+		int node1 = components[i].nodes[0];
+		int node0 = components[i].nodes[1];
+
+		float value = components[i].value; //for resistors, inductors, capacitors and dc sources
+
+		if(components[i].flavour == 'V'){
+
+			if(node1 != 0)
+			{
+				if(!changed[node1 - 1] && node1 != 0)
+				{
+					matrix.row(node1 - 1).setZero();
+					curvec(node1 - 1) = 0;
+					changed[node1 -1] = true;
+				}
+			}
+			if(node0 != 0)
+			{
+				if(!changed[node0 - 1] && node0 != 0)
+				{
+					matrix.row(node0 - 1).setZero();
+					curvec(node0 - 1) = 0;
+					changed[node0 - 1] = true;
+				}
+			}
+			if(node0 == 0)
+			{
+				matrix(node1 - 1, node1 - 1) += 1;
+				curvec(node1 - 1) += value;
+			}
+			if(node1 == 0)
+			{
+				matrix(node0 - 1, node0 - 1) += 1;
+				curvec(node0 - 1) -= value;
+			}
+			if((node1 != 0) && (node0 != 0))
+			{
+				matrix(node1 - 1, node1 - 1) += 1;
+				matrix(node1 - 1, node0 - 1) -= 1;
+
+				matrix(node0 - 1, node0 - 1) += 1;
+				matrix(node0 - 1, node1 - 1) -= 1;
+
+				curvec(node0 - 1) -= value;
+				curvec(node1 - 1) += value;
+			}
+		}
+
+	}
  
-	return make_pair(matrix, curvec);	//may or may not be the right way round
+	return make_pair(matrix, curvec);
 }
 
 int main()
