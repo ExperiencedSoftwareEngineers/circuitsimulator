@@ -54,33 +54,89 @@ vector<Component> betweennodes(Network netw, int node1, int node2)
 }
 
 
-pair<MatrixXf,VectorXf) condmatrix(Network netw, float time)
-{
-	vector<Component> list = netw.parts;
-	vector<int> nodes = sortandmerge(netw);
-	MatrixXf matrix(nodes.size()-1, nodes.size()-1);
-	VectorXf curvec(nodes.size()-1);
-	for(int i = 1; i < nodes.size(); i++)//iterating row
-	{
-		vector<Component> nodecom = listfornode(netw, nodes[i]);
-		bool other = true;
-		float voltage = 0;
-		for(int a = 1; a < nodecom.size(); a++)
-		{
-			if(nodecom[a].type == 'V')
-			{
-				voltage += nodecom[a].value;
-			}
-			if(nodecom[a].type == 'W')
-			{
-				voltage += nodecom[a].offset + nodecom[a].amplitude * ;
-			}
-		} 
-		for(int a = 1; a < nodes.size(); a++)//columns
-		{
+// pair<MatrixXf,VectorXf) condmatrix(Network netw, float time)
+// {
+// 	vector<Component> list = netw.parts;
+// 	vector<int> nodes = sortandmerge(netw);
+// 	MatrixXf matrix(nodes.size()-1, nodes.size()-1);
+// 	VectorXf curvec(nodes.size()-1);
+// 	for(int i = 1; i < nodes.size(); i++)//iterating row
+// 	{
+// 		vector<Component> nodecom = listfornode(netw, nodes[i]);
+// 		bool other = true;
+// 		float voltage = 0;
+// 		for(int a = 1; a < nodecom.size(); a++)
+// 		{
+// 			if(nodecom[a].type == 'V')
+// 			{
+// 				voltage += nodecom[a].value;
+// 			}
+// 			if(nodecom[a].type == 'W')
+// 			{
+// 				voltage += nodecom[a].offset + nodecom[a].amplitude * ;
+// 			}
+// 		} 
+// 		for(int a = 1; a < nodes.size(); a++)//columns
+// 		{
 			
+// 		}
+// 	}
+// }
+
+
+
+pair<MatrixXf,VectorXf) condmatrix(Network netw)
+{
+	vector<Component> components = netw.parts; // list of all components in circuit
+	vector<int> nodes = sortandmerge(netw); // list of all nodes in netlist
+
+
+	MatrixXf matrix(nodes.size()-1, nodes.size()-1); // define the conductance matrix and voltage vector
+	VectorXf curvec(nodes.size()-1); // define voltge vector
+	VectorXf rhs(nodes.size()-1); // define vector on right hand side of eqn
+
+
+	for(int i = 0; i < components.size(); i++) // loop through all components in circuit
+	{
+		int node1 = components[i].nodes[0];
+		int node0 = components[i].nodes[1];
+
+		float value = components[i].value; //for resistors, inductors, capacitors and dc sources
+
+		if(components[i].type == 'R')
+		{
+			//diagonal, addition of all conductances attached to node
+
+			if(node0 != 0)
+			{
+				matrix(node0 - 1, node0 - 1) += 1/value; // every time go round loop add resistor conductance to G(node1 -1)(node1 -1)
+			}											 // and G(node0 -1)(node0-1) once looped through all components the values
+			if(node1 != 0)								 //of G for the diagonal will be correct
+			{
+				matrix(node1 - 1, node1 -1) += 1/value; 
+			}
+
+			//off diagonal, conductance between nodes
+
+			if(node0 != 0 && node1 != 0)
+			{
+				matrix(node1 -1, node0 -1) += -1/value; //eg if node0 = 1 and node1 = 2 there must be a direct connection so G21 is -1/value
+				matrix(node0 -1, node1 -1) += -1/value;	//since G12 = G21 
+			}
+		}
+		else if(components[i].type == 'I') //for DC current sources
+		{
+			if(node1 != 0)
+			{
+				rhs(node1 - 1) += -value; //defined +ve current as flowing from node0 to node1
+			}
+			if(node0 != 0)
+			{
+				rhs(node0 - 1) += value;
+			}
 		}
 	}
+		
 }
 
 int main()
