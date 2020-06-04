@@ -85,7 +85,7 @@ vector<Component> betweennodes(Network netw, int node1, int node2)
 
 
 
-pair<MatrixXf,VectorXf> condmatrix(Network netw)
+pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 {
 	vector<Component> components = netw.parts; // list of all components in circuit
 	vector<int> nodes = sortandmerge(netw); // list of all nodes in netlist
@@ -101,9 +101,15 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw)
 	{
 		int node1 = components[i].nodes[0];
 		int node0 = components[i].nodes[1];
-
-		float value = components[i].value; //for resistors, inductors, capacitors and dc sources
-
+		float value = 0;
+		if((components[i].flavour == 'W')||(components[i].flavour == 'J'))
+		{
+			value = components[i].offset + (components[i].amplitude * sin(components[i].frequency * time));
+		}
+		else
+		{
+			value = components[i].value; //for resistors, inductors, capacitors and dc sources
+		}
 		if(components[i].flavour == 'R')
 		{
 			//diagonal, addition of all conductances attached to node
@@ -125,7 +131,7 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw)
 				matrix(node0 -1, node1 -1) += -1/value;	//since G12 = G21 
 			}
 		}
-		else if(components[i].flavour == 'I') //for DC current sources
+		else if((components[i].flavour == 'I') || (components[i].flavour == 'J')) //for DC current sources
 		{
 			if(node1 != 0)
 			{
@@ -147,10 +153,18 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw)
 		
 		int node1 = components[i].nodes[0];
 		int node0 = components[i].nodes[1];
+		float value = 0;
 
-		float value = components[i].value; //for resistors, inductors, capacitors and dc sources
+		if((components[i].flavour == 'W')||(components[i].flavour == 'J'))
+		{
+			value = components[i].offset + (components[i].amplitude * sin(components[i].frequency * time));
+		}
+		else
+		{
+			value = components[i].value; //for resistors, inductors, capacitors and dc sources
+		}
 
-		if(components[i].flavour == 'V'){
+		if((components[i].flavour == 'V') || (components[i].flavour == 'W')){
 
 			if(node1 != 0)
 			{
