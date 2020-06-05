@@ -53,45 +53,13 @@ vector<Component> betweennodes(Network netw, int node1, int node2)
 	return output;
 }
 
-
-// pair<MatrixXf,VectorXf) condmatrix(Network netw, float time)
-// {
-// 	vector<Component> list = netw.parts;
-// 	vector<int> nodes = sortandmerge(netw);
-// 	MatrixXf matrix(nodes.size()-1, nodes.size()-1);
-// 	VectorXf curvec(nodes.size()-1);
-// 	for(int i = 1; i < nodes.size(); i++)//iterating row
-// 	{
-// 		vector<Component> nodecom = listfornode(netw, nodes[i]);
-// 		bool other = true;
-// 		float voltage = 0;
-// 		for(int a = 1; a < nodecom.size(); a++)
-// 		{
-// 			if(nodecom[a].flavour == 'V')
-// 			{
-// 				voltage += nodecom[a].value;
-// 			}
-// 			if(nodecom[a].flavour == 'W')
-// 			{
-// 				voltage += nodecom[a].offset + nodecom[a].amplitude * ;
-// 			}
-// 		} 
-// 		for(int a = 1; a < nodes.size(); a++)//columns
-// 		{
-			
-// 		}
-// 	}
-// }
-
-
-
 pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 {
 	vector<Component> components = netw.parts; // list of all components in circuit
 	vector<int> nodes = sortandmerge(netw); // list of all nodes in netlist
 	
 	int group2Count = netw.voltageCount;
-	cout << "droup2Count: " << group2Count << endl;
+	cout << "Group2Count: " << group2Count << endl;
 	cout << "nodes.size -1: " << nodes.size() -1<< endl;
 	int sizeOfMatrix = group2Count + nodes.size() -1;
 
@@ -158,19 +126,15 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 		}
 		else if(components[i].flavour == 'V'|| (components[i].flavour == 'W'))
 		{
-			cout << "got in" << endl;
 			if(node0 != 0)
 			{
 				matrixA(node0 -1, group2Index) -= 1;
 				matrixA(group2Index, node0 -1) -= 1;
-				cout << "yoy"<< endl;
 			}
 			if(node1 != 0)
 			{
 				matrixA(node1 - 1, group2Index) += 1;
 				matrixA(group2Index, node1 -1) += 1;
-				cout << "yay"<< endl;
-				cout << matrixA << endl;
 			}
 
 			curvec(group2Index) = value;

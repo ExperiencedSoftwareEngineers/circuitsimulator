@@ -59,7 +59,6 @@ Network parseNetwork()
 	chad.resistorCount = 0;
     while(end)
 	{
-		cout << "hello" << end;
         line = troy();
 		
 		if (line[0][0] != '.')
