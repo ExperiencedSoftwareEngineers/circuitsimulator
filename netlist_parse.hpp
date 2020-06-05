@@ -55,8 +55,11 @@ Network parseNetwork()
 	int node1;
 	int node2;
 	chad.voltageCount = 0;
+	chad.currentCount = 0;
+	chad.resistorCount = 0;
     while(end)
 	{
+		cout << "hello" << end;
         line = troy();
 		
 		if (line[0][0] != '.')
@@ -93,6 +96,9 @@ Network parseNetwork()
 		}
 		else if (line[0][0] == 'V')
 		{
+			chad.voltageCount += 1;
+			cout << "parse voltage count: " << chad.voltageCount << endl;
+
 			if(line[3][0]=='S')
 			{
 			comp = VoltageAC(line[0], inputnodes, stof(line[3].substr(5)), stof(line[4]), stof(line[5].substr(0,(line[5].length())-1)));
@@ -100,14 +106,14 @@ Network parseNetwork()
 			else
 			{
 			comp = VoltageDC(line[0], inputnodes, stof(line[3]));
-			chad.parts.push_back(comp);
-			chad.voltageCount += 1;
-			cout << "parse voltage count: " << chad.voltageCount << endl;
 			}
+			chad.parts.push_back(comp);
 
 		}
 		else if (line[0][0] == 'I')
 		{
+			chad.currentCount += 1;
+			cout << "current Count: " << chad.currentCount << endl;
 			if(line[3][0]=='S')
 			{
 			comp = CurrentAC(line[0], inputnodes, stof(line[3].substr(5)), stof(line[4]), stof(line[5].substr(0,(line[5].length())-1)));
@@ -115,9 +121,8 @@ Network parseNetwork()
 			else
 			{
 			comp = CurrentDC(line[0], inputnodes, stof(line[3]));
-			chad.parts.push_back(comp);
-			chad.currentCount += 1;
 			}
+			chad.parts.push_back(comp);
 		}
 		else if (line[0] == ".tran")
 		{

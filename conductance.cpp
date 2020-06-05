@@ -92,6 +92,7 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 	
 	int group2Count = netw.voltageCount;
 	cout << "droup2Count: " << group2Count << endl;
+	cout << "nodes.size -1: " << nodes.size() -1<< endl;
 	int sizeOfMatrix = group2Count + nodes.size() -1;
 
 	MatrixXf matrixA(sizeOfMatrix, sizeOfMatrix); // define the conductance matrix and voltage vector
@@ -111,9 +112,13 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 		int node1 = components[i].nodes[0];
 		int node0 = components[i].nodes[1];
 		float value = 0;
+		cout << "flavour: " << components[i].flavour << endl;
+
 		if((components[i].flavour == 'W')||(components[i].flavour == 'J'))
 		{
 			value = components[i].offset + (components[i].amplitude * sin(components[i].frequency * 2 * M_PI * time));
+			cout << "time: " << time << endl;
+			cout << "value: " << value << endl;
 		}
 		else
 		{
@@ -140,7 +145,7 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 				matrixA(node0 -1, node1 -1) += -1/value;	//since G12 = G21 
 			}
 		}
-		else if((components[i].flavour == 'I') || (components[i].flavour == 'J')) //for DC current sources
+		else if((components[i].flavour == 'I') || (components[i].flavour == 'J')) 
 		{
 			if(node1 != 0)
 			{
@@ -151,8 +156,9 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 				curvec(node0 - 1) += value;
 			}
 		}
-		else if(components[i].flavour == 'V')
+		else if(components[i].flavour == 'V'|| (components[i].flavour == 'W'))
 		{
+			cout << "got in" << endl;
 			if(node0 != 0)
 			{
 				matrixA(node0 -1, group2Index) -= 1;
@@ -247,9 +253,9 @@ VectorXf solmatrix(Network netw, float time)
 {
 	pair<MatrixXf,VectorXf> evans = condmatrix(netw, time);
 	MatrixXf condmat = evans.first;
-	//cout << condmat << endl;
+	cout << condmat << endl;
 	VectorXf curvec = evans.second;
-	//cout << curvec << endl;
+	cout << curvec << endl;
 	MatrixXf incondmat = condmat.inverse();
 	//cout << incondmat << endl;
 	VectorXf volvec = incondmat * curvec;
