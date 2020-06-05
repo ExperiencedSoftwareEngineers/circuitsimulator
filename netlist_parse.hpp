@@ -81,7 +81,7 @@ Network parseNetwork()
 			comp = Resistor(line[0], inputnodes, stof(line[3]));
 			chad.parts.push_back(comp);
 			chad.resistorCount += 1;
-			cout << "parse Resistor count: " << chad.resistorCount << endl;
+			//cout << "parse Resistor count: " << chad.resistorCount << endl;
 		}
 		else if (line[0][0] == 'L')
 		{
@@ -96,7 +96,7 @@ Network parseNetwork()
 		else if (line[0][0] == 'V')
 		{
 			chad.voltageCount += 1;
-			cout << "parse voltage count: " << chad.voltageCount << endl;
+			//cout << "parse voltage count: " << chad.voltageCount << endl;
 
 			if(line[3][0]=='S')
 			{
@@ -112,7 +112,7 @@ Network parseNetwork()
 		else if (line[0][0] == 'I')
 		{
 			chad.currentCount += 1;
-			cout << "current Count: " << chad.currentCount << endl;
+			//cout << "current Count: " << chad.currentCount << endl;
 			if(line[3][0]=='S')
 			{
 			comp = CurrentAC(line[0], inputnodes, stof(line[3].substr(5)), stof(line[4]), stof(line[5].substr(0,(line[5].length())-1)));
