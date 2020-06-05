@@ -255,7 +255,7 @@ vector<float> current(Network netw, VectorXf volvec, float time)
 			{
 				output.push_back(volvec[node1 - 1] / value);
 			}
-			else if(node1 == 1)
+			else if(node1 == 0)
 			{
 				output.push_back(-1 * volvec[node0 - 1] / value);
 			}
@@ -312,23 +312,50 @@ int main()
 	
 
 
-
+	vector<int> nodes = sortandmerge(n);
 	
 	vector<VectorXf> printed = simulate(n);
 	float step = n.step;
 	//cout << step << endl;
+
+	cout << "time" <<  "	";
+
+	for(int i = 1; i < nodes.size(); i++)
+	{
+		cout << "V(node" << nodes[i] << ")" << "	";
+	}
+
+	for(int i = 0; i< n.parts.size(); i++)
+	{
+		if((n.parts[i].flavour == 'V') || (n.parts[i].flavour == 'W'))
+		{
+			cout << n.parts[i].name <<  "	";
+		}
+	}
+
+	for(int i = 0; i< n.parts.size(); i++)
+	{
+		if((n.parts[i].flavour != 'V') && (n.parts[i].flavour != 'W'))
+		{
+			cout << n.parts[i].name <<  "	";
+		}
+	}
+
+	cout << endl;
+
+
 	for(int i = 0; i < printed.size(); i++)
 	{
 		if(i%2 == 0)
 		{
-			cout << step * i / 2 << ",";
+			cout << step * i / 2 << "	";
 		}
 		for(int a = 0; a < printed[i].size(); a++)	
 		{
 			cout << printed[i](a);
 			if(printed[i].size()-1 != a)
 			{
-				cout << ",";
+				cout << "	";
 			}
 		}
 		if(i%2)
@@ -337,7 +364,7 @@ int main()
 		}
 		else
 		{
-			cout<<",";
+			cout<< "	";
 		}
 	}
 }
