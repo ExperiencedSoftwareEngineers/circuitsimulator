@@ -53,48 +53,26 @@ vector<Component> betweennodes(Network netw, int node1, int node2)
 	return output;
 }
 
-
-// pair<MatrixXf,VectorXf) condmatrix(Network netw, float time)
-// {
-// 	vector<Component> list = netw.parts;
-// 	vector<int> nodes = sortandmerge(netw);
-// 	MatrixXf matrix(nodes.size()-1, nodes.size()-1);
-// 	VectorXf curvec(nodes.size()-1);
-// 	for(int i = 1; i < nodes.size(); i++)//iterating row
-// 	{
-// 		vector<Component> nodecom = listfornode(netw, nodes[i]);
-// 		bool other = true;
-// 		float voltage = 0;
-// 		for(int a = 1; a < nodecom.size(); a++)
-// 		{
-// 			if(nodecom[a].flavour == 'V')
-// 			{
-// 				voltage += nodecom[a].value;
-// 			}
-// 			if(nodecom[a].flavour == 'W')
-// 			{
-// 				voltage += nodecom[a].offset + nodecom[a].amplitude * ;
-// 			}
-// 		} 
-// 		for(int a = 1; a < nodes.size(); a++)//columns
-// 		{
-			
-// 		}
-// 	}
-// }
-
-
-
 pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 {
 	vector<Component> components = netw.parts; // list of all components in circuit
 	vector<int> nodes = sortandmerge(netw); // list of all nodes in netlist
+	
+	int group2Count = netw.voltageCount;
+	cout << "Group2Count: " << group2Count << endl;
+	cout << "nodes.size -1: " << nodes.size() -1<< endl;
+	int sizeOfMatrix = group2Count + nodes.size() -1;
 
+	MatrixXf matrixA(sizeOfMatrix, sizeOfMatrix); // define the conductance matrix and voltage vector
+	matrixA = MatrixXf::Zero(sizeOfMatrix, sizeOfMatrix);
+	cout << matrixA << endl;
+	VectorXf curvec(sizeOfMatrix); // define current vector
+	curvec = VectorXf::Zero(sizeOfMatrix);
+	cout << curvec << endl;
+	
+	int group2Index = sizeOfMatrix - group2Count;
+	cout << "group2Index: " << group2Index << endl;
 
-	MatrixXf matrix(nodes.size()-1, nodes.size()-1); // define the conductance matrix and voltage vector
-	matrix = MatrixXf::Zero(nodes.size()-1, nodes.size()-1);
-	VectorXf curvec(nodes.size()-1); // define current vector
-	curvec = VectorXf::Zero(nodes.size()-1);
 
 
 	for(int i = 0; i < components.size(); i++) // loop through all components in circuit
@@ -102,9 +80,13 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 		int node1 = components[i].nodes[0];
 		int node0 = components[i].nodes[1];
 		float value = 0;
+		cout << "flavour: " << components[i].flavour << endl;
+
 		if((components[i].flavour == 'W')||(components[i].flavour == 'J'))
 		{
 			value = components[i].offset + (components[i].amplitude * sin(components[i].frequency * 2 * M_PI * time));
+			cout << "time: " << time << endl;
+			cout << "value: " << value << endl;
 		}
 		else
 		{
@@ -116,22 +98,22 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 
 			if(node0 != 0)
 			{
-				matrix(node0 - 1, node0 - 1) += 1/value; // every time go round loop add resistor conductance to G(node1 -1)(node1 -1)
+				matrixA(node0 - 1, node0 - 1) += 1/value; // every time go round loop add resistor conductance to G(node1 -1)(node1 -1)
 			}											 // and G(node0 -1)(node0-1) once looped through all components the values
 			if(node1 != 0)								 //of G for the diagonal will be correct
 			{
-				matrix(node1 - 1, node1 -1) += 1/value; 
+				matrixA(node1 - 1, node1 -1) += 1/value; 
 			}
 
 			//off diagonal, conductance between nodes
 
 			if(node0 != 0 && node1 != 0)
 			{
-				matrix(node1 -1, node0 -1) += -1/value; //eg if node0 = 1 and node1 = 2 there must be a direct connection so G21 is -1/value
-				matrix(node0 -1, node1 -1) += -1/value;	//since G12 = G21 
+				matrixA(node1 -1, node0 -1) += -1/value; //eg if node0 = 1 and node1 = 2 there must be a direct connection so G21 is -1/value
+				matrixA(node0 -1, node1 -1) += -1/value;	//since G12 = G21 
 			}
 		}
-		else if((components[i].flavour == 'I') || (components[i].flavour == 'J')) //for DC current sources
+		else if((components[i].flavour == 'I') || (components[i].flavour == 'J')) 
 		{
 			if(node1 != 0)
 			{
@@ -142,84 +124,102 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 				curvec(node0 - 1) += value;
 			}
 		}
-	}
-
-	vector<bool> changed;
-	for(int i = 0; i < nodes.size(); i++){
-		changed.push_back(0); //note this is a bool, not a number
-	}
-
-	for(int i = 0; i < components.size(); i++){
-		
-		int node1 = components[i].nodes[0];
-		int node0 = components[i].nodes[1];
-		float value = 0;
-
-		if((components[i].flavour == 'W')||(components[i].flavour == 'J'))
+		else if(components[i].flavour == 'V'|| (components[i].flavour == 'W'))
 		{
-			value = components[i].offset + (components[i].amplitude * sin(components[i].frequency * 2* M_PI* time));
-			//cout << "value: " << value << endl;
-		}
-		else
-		{
-			value = components[i].value; //for resistors, inductors, capacitors and dc sources
-		}
-
-		if((components[i].flavour == 'V') || (components[i].flavour == 'W')){
-
-			if(node1 != 0)
-			{
-				if(!changed[node1 - 1] && node1 != 0)
-				{
-					matrix.row(node1 - 1).setZero();
-					curvec(node1 - 1) = 0;
-					changed[node1 -1] = true;
-				}
-			}
 			if(node0 != 0)
 			{
-				if(!changed[node0 - 1] && node0 != 0)
-				{
-					matrix.row(node0 - 1).setZero();
-					curvec(node0 - 1) = 0;
-					changed[node0 - 1] = true;
-				}
+				matrixA(node0 -1, group2Index) -= 1;
+				matrixA(group2Index, node0 -1) -= 1;
 			}
-			if(node0 == 0)
+			if(node1 != 0)
 			{
-				matrix(node1 - 1, node1 - 1) += 1;
-				curvec(node1 - 1) += value;
+				matrixA(node1 - 1, group2Index) += 1;
+				matrixA(group2Index, node1 -1) += 1;
 			}
-			if(node1 == 0)
-			{
-				matrix(node0 - 1, node0 - 1) += 1;
-				curvec(node0 - 1) -= value;
-			}
-			if((node1 != 0) && (node0 != 0))
-			{
-				matrix(node1 - 1, node1 - 1) += 1;
-				matrix(node1 - 1, node0 - 1) -= 1;
 
-				matrix(node0 - 1, node0 - 1) += 1;
-				matrix(node0 - 1, node1 - 1) -= 1;
+			curvec(group2Index) = value;
 
-				curvec(node0 - 1) -= value;
-				curvec(node1 - 1) += value;
-			}
+			group2Index +=1;
+
 		}
-
 	}
+
+	// vector<bool> changed;
+	// for(int i = 0; i < nodes.size(); i++){
+	// 	changed.push_back(0); //note this is a bool, not a number
+	// }
+
+	// for(int i = 0; i < components.size(); i++){
+		
+	// 	int node1 = components[i].nodes[0];
+	// 	int node0 = components[i].nodes[1];
+	// 	float value = 0;
+
+	// 	if((components[i].flavour == 'W')||(components[i].flavour == 'J'))
+	// 	{
+	// 		value = components[i].offset + (components[i].amplitude * sin(components[i].frequency * 2* M_PI* time));
+	// 		//cout << "value: " << value << endl;
+	// 	}
+	// 	else
+	// 	{
+	// 		value = components[i].value; //for resistors, inductors, capacitors and dc sources
+	// 	}
+
+	// 	if((components[i].flavour == 'V') || (components[i].flavour == 'W')){
+
+	// 		if(node1 != 0)
+	// 		{
+	// 			if(!changed[node1 - 1] && node1 != 0)
+	// 			{
+	// 				matrixA.row(node1 - 1).setZero();
+	// 				curvec(node1 - 1) = 0;
+	// 				changed[node1 -1] = true;
+	// 			}
+	// 		}
+	// 		if(node0 != 0)
+	// 		{
+	// 			if(!changed[node0 - 1] && node0 != 0)
+	// 			{
+	// 				matrixA.row(node0 - 1).setZero();
+	// 				curvec(node0 - 1) = 0;
+	// 				changed[node0 - 1] = true;
+	// 			}
+	// 		}
+	// 		if(node0 == 0)
+	// 		{
+	// 			matrixA(node1 - 1, node1 - 1) += 1;
+	// 			curvec(node1 - 1) += value;
+	// 		}
+	// 		if(node1 == 0)
+	// 		{
+	// 			matrixA(node0 - 1, node0 - 1) += 1;
+	// 			curvec(node0 - 1) -= value;
+	// 		}
+	// 		if((node1 != 0) && (node0 != 0))
+	// 		{
+	// 			matrixA(node1 - 1, node1 - 1) += 1;
+	// 			matrixA(node1 - 1, node0 - 1) -= 1;
+
+	// 			matrixA(node0 - 1, node0 - 1) += 1;
+	// 			matrixA(node0 - 1, node1 - 1) -= 1;
+
+	// 			curvec(node0 - 1) -= value;
+	// 			curvec(node1 - 1) += value;
+	// 		}
+	// 	}
+
+	// }
  
-	return make_pair(matrix, curvec);
+	return make_pair(matrixA, curvec);
 }
 
 VectorXf solmatrix(Network netw, float time)
 {
 	pair<MatrixXf,VectorXf> evans = condmatrix(netw, time);
 	MatrixXf condmat = evans.first;
-	//cout << condmat << endl;
+	cout << condmat << endl;
 	VectorXf curvec = evans.second;
-	//cout << curvec << endl;
+	cout << curvec << endl;
 	MatrixXf incondmat = condmat.inverse();
 	//cout << incondmat << endl;
 	VectorXf volvec = incondmat * curvec;
@@ -283,12 +283,17 @@ int main()
 {
 	Network n = parseNetwork();
 	vector<int> output = sortandmerge(n);
-	// VectorXf printed = solmatrix(n, 0.01);
-	// cout << printed << endl;
+	VectorXf lol = solmatrix(n, 0.01);
+	
+	cout << lol;
+
+
+
+
 	//cout << n.stop << endl << n.step;
-	vector<VectorXf> printed = simulate(n);
-	for(int i = 0; i < printed.size(); i++)
-	{	
-		cout << printed[i] << endl << endl;
-	}
+	//vector<VectorXf> printed = simulate(n);
+	// for(int i = 0; i < printed.size(); i++)
+	// {	
+	// 	cout << printed[i] << endl << endl;
+	// }
 }
