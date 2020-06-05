@@ -120,6 +120,9 @@ class Network{
     vector<Component> parts;
 	float stop; //stop time of the transient analysis
 	float step; //time between intervals
+	int voltageCount;
+	int resistorCount;
+	int currentCount;
 	
 };
 
