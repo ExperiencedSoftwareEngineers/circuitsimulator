@@ -226,12 +226,13 @@ VectorXf solmatrix(Network netw, float time)
 	return volvec;
 }
 
-vector<float> current(Network netw, VectorXf volvec)
+vector<float> current(Network netw, VectorXf volvec, float time)
 {
 	vector<Component> components = netw.parts;
 	vector<float> output;
 	vector<float> nodalcomponents;
-	
+	float value = 0;
+
 	for(int i = 0; i < components.size(); i++) // loop through all components in circuit
 	{
 		int node1 = components[i].nodes[0];
@@ -263,7 +264,14 @@ vector<float> current(Network netw, VectorXf volvec)
 				output.push_back((volvec[node1 - 1] - volvec[node0 - 1]) / value);
 			}
 		}
+		if((components[i].flavour == 'I')||(components[i].flavour == 'J'))
+		{
+				output.push_back(value);
+		}
+		
 	}
+
+	return output;
 }
 
 vector<VectorXf> simulate(Network netw)
@@ -285,7 +293,14 @@ int main()
 	vector<int> output = sortandmerge(n);
 	VectorXf lol = solmatrix(n, 0.01);
 	
-	cout << lol;
+	cout << lol << endl;
+
+	vector<float> woah = current(n, lol, 0.01);
+
+	for(int i = 0; i < woah.size(); i++)
+	{
+		cout << "current: " << woah[i] << endl;
+	}
 
 
 
