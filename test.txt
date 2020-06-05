@@ -2,6 +2,4 @@ R1 N002 N001 4
 R2 N002 0 2
 I1 0 N002 2
 V1 N001 0 3
-.op
-.backanno
 .end
