@@ -226,6 +226,46 @@ VectorXf solmatrix(Network netw, float time)
 	return volvec;
 }
 
+vector<float> current(Network netw, VectorXf volvec)
+{
+	vector<Component> components = netw.parts;
+	vector<float> output;
+	vector<float> nodalcomponents;
+	
+	for(int i = 0; i < components.size(); i++) // loop through all components in circuit
+	{
+		int node1 = components[i].nodes[0];
+		int node0 = components[i].nodes[1];
+		float voltage = 0;
+	
+		if((components[i].flavour == 'W')||(components[i].flavour == 'J'))
+		{
+			value = components[i].offset + (components[i].amplitude * sin(components[i].frequency * 2* M_PI* time));
+			//cout << "value: " << value << endl;
+		}
+		else
+		{
+			value = components[i].value; //for resistors, inductors, capacitors and dc sources
+		}
+	
+		if(components[i].flavour == 'R')
+		{
+			if(node0 == 0)
+			{
+				output.push_back(volvec[node1 - 1] / value);
+			}
+			else if(node1 == 1)
+			{
+				output.push_back(-1 * volvec[node0 - 1] / value);
+			}
+			else
+			{
+				output.push_back((volvec[node1 - 1] - volvec[node0 - 1]) / value);
+			}
+		}
+	}
+}
+
 vector<VectorXf> simulate(Network netw)
 {
 	vector<VectorXf> output;
@@ -237,6 +277,7 @@ vector<VectorXf> simulate(Network netw)
 	}
 	return output;		
 }
+
 
 int main()
 {
