@@ -23,6 +23,7 @@ class Component{
 	char flavour;
 	float prevCurrent;
 	float prevVoltage;
+	float lastValue;
 };
 
 class Resistor : public Component {
@@ -59,6 +60,7 @@ public:
 		value = val;
 		flavour = 'C';
 		prevCurrent;
+		lastValue = 0;
 	}
     // float value;
 };

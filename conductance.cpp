@@ -5,7 +5,7 @@
 
 using namespace Eigen;
 
-vector<int> sortandmerge(Network netw)
+vector<int> sortandmerge(Network &netw)
 {
 	vector<int> biglist;
 	for(int i = 0; i < netw.parts.size(); i++)
@@ -20,7 +20,7 @@ vector<int> sortandmerge(Network netw)
 	return biglist;
 }
 
-vector<Component> listfornode(Network netw, int node)
+vector<Component> listfornode(Network &netw, int node)
 {
 	vector<Component> output;
 	for(int i = 0; i < netw.parts.size(); i++)
@@ -36,7 +36,7 @@ vector<Component> listfornode(Network netw, int node)
 	return output;
 }
 
-vector<Component> betweennodes(Network netw, int node1, int node2)
+vector<Component> betweennodes(Network &netw, int node1, int node2)
 {
 	vector<Component> input = listfornode(netw, node1);
 	vector<Component> output;
@@ -53,7 +53,7 @@ vector<Component> betweennodes(Network netw, int node1, int node2)
 	return output;
 }
 
-pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
+pair<MatrixXf,VectorXf> condmatrix(Network &netw, float time)
 {
 	vector<Component> components = netw.parts; // list of all components in circuit
 	vector<int> nodes = sortandmerge(netw); // list of all nodes in netlist
@@ -75,10 +75,7 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 	// cout << "group2Index: " << group2Index << endl;
 
 	float step = netw.step;
-
-
-
-
+	//cout << "network step: " << netw.step << endl;
 
 
 	for(int i = 0; i < components.size(); i++) // loop through all components in circuit
@@ -99,22 +96,19 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 			if(time == 0)
 			{
 				components[i].prevCurrent = 0;
+				components[i].lastValue = 0;
+				//cout << "prevCurrent condmatrix set zero: " << netw.parts[i].prevCurrent << endl;
+
 			}
-			value = (step * components[i].prevCurrent)/components[i].value;
-			// cout << "cap val: " << value << endl;
-			// cout << "prevCurrent: " << netw.parts[i].prevCurrent << endl;
-		}
-		else if(components[i].flavour == 'C')
-		{
-			if(time == 0)
-			{
-				components[i].prevVoltage = 0;
-			}
-			value = (step * components[i].prevCurrent)/components[i].value;
+			value = (step * netw.parts[i].prevCurrent)/(netw.parts[i].value) + netw.parts[i].lastValue;
+			//cout << "before update last value: " << netw.parts[i].lastValue << endl;
+			netw.parts[i].lastValue = value;
+			//cout << "lastValue: " << netw.parts[i].lastValue << endl;
+			//cout << "prevCurrent condmatrix: " << netw.parts[i].prevCurrent << endl;
 		}
 		else
 		{
-			value = components[i].value; //for resistors, inductors, capacitors and dc sources
+			value = components[i].value; //for resistors, inductors and dc sources
 		}
 		if(components[i].flavour == 'R')
 		{
@@ -166,93 +160,35 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 			group2Index +=1;
 
 		}
+
 	}
 
-	// vector<bool> changed;
-	// for(int i = 0; i < nodes.size(); i++){
-	// 	changed.push_back(0); //note this is a bool, not a number
-	// }
-
-	// for(int i = 0; i < components.size(); i++){
-		
-	// 	int node1 = components[i].nodes[0];
-	// 	int node0 = components[i].nodes[1];
-	// 	float value = 0;
-
-	// 	if((components[i].flavour == 'W')||(components[i].flavour == 'J'))
-	// 	{
-	// 		value = components[i].offset + (components[i].amplitude * sin(components[i].frequency * 2* M_PI* time));
-	// 		//cout << "value: " << value << endl;
-	// 	}
-	// 	else
-	// 	{
-	// 		value = components[i].value; //for resistors, inductors, capacitors and dc sources
-	// 	}
-
-	// 	if((components[i].flavour == 'V') || (components[i].flavour == 'W')){
-
-	// 		if(node1 != 0)
-	// 		{
-	// 			if(!changed[node1 - 1] && node1 != 0)
-	// 			{
-	// 				matrixA.row(node1 - 1).setZero();
-	// 				curvec(node1 - 1) = 0;
-	// 				changed[node1 -1] = true;
-	// 			}
-	// 		}
-	// 		if(node0 != 0)
-	// 		{
-	// 			if(!changed[node0 - 1] && node0 != 0)
-	// 			{
-	// 				matrixA.row(node0 - 1).setZero();
-	// 				curvec(node0 - 1) = 0;
-	// 				changed[node0 - 1] = true;
-	// 			}
-	// 		}
-	// 		if(node0 == 0)
-	// 		{
-	// 			matrixA(node1 - 1, node1 - 1) += 1;
-	// 			curvec(node1 - 1) += value;
-	// 		}
-	// 		if(node1 == 0)
-	// 		{
-	// 			matrixA(node0 - 1, node0 - 1) += 1;
-	// 			curvec(node0 - 1) -= value;
-	// 		}
-	// 		if((node1 != 0) && (node0 != 0))
-	// 		{
-	// 			matrixA(node1 - 1, node1 - 1) += 1;
-	// 			matrixA(node1 - 1, node0 - 1) -= 1;
-
-	// 			matrixA(node0 - 1, node0 - 1) += 1;
-	// 			matrixA(node0 - 1, node1 - 1) -= 1;
-
-	// 			curvec(node0 - 1) -= value;
-	// 			curvec(node1 - 1) += value;
-	// 		}
-	// 	}
-
-	// }
+	
 
 	return make_pair(matrixA, curvec);
 }
 
-VectorXf solmatrix(Network netw, float time)
+
+
+VectorXf solmatrix(Network &netw, float time)
 {
 	pair<MatrixXf,VectorXf> evans = condmatrix(netw, time);
 	MatrixXf condmat = evans.first;
-	// cout << condmat << endl << endl;
+	//cout << "condmat: " << endl << condmat << endl << endl;
 	VectorXf curvec = evans.second;
-	// cout << curvec << endl << endl;
+	//cout << "curvec: " << curvec << endl << endl;
 	MatrixXf incondmat = condmat.inverse();
 	//cout << incondmat << endl;
 	VectorXf volvec = incondmat * curvec;
-	// cout << volvec << endl;
+	//cout << "sol: " << endl<< volvec << endl << endl;
+
 
 	return volvec;
 }
 
-vector<float> current(Network netw, VectorXf volvec, float time)
+
+
+vector<float> current(Network &netw, VectorXf volvec, float time)
 {
 	vector<Component> components = netw.parts;
 	vector<float> output;
@@ -300,7 +236,9 @@ vector<float> current(Network netw, VectorXf volvec, float time)
 	return output;
 }
 
-vector<VectorXf> simulate(Network netw)
+
+
+vector<VectorXf> simulate(Network &netw)
 {
 	vector<VectorXf> output;
 	float stop = netw.stop;
@@ -324,7 +262,7 @@ vector<VectorXf> simulate(Network netw)
 			{
 				index++;
 				netw.parts[i].prevCurrent = volvec(index);
-				// cout << "prev current: " << volvec(index) << endl;
+				//cout << "prev current: " << volvec(index) << endl;
 				// cout << index << endl;
 			}
 			if((netw.parts[i].flavour == 'V')|| (netw.parts[i].flavour == 'W'))
@@ -346,28 +284,15 @@ vector<VectorXf> simulate(Network netw)
 }
 
 
+
 int main()
 {
 	Network n = parseNetwork();
-	// vector<int> output = sortandmerge(n);
-	// VectorXf lol = solmatrix(n, 1);
-	// cout << lol << endl;
-
-	// vector<float> woah = current(n, lol, 1);
-
-	// for(int i = 0; i < woah.size(); i++)
-	// {
-	// 	cout << "current: " << woah[i] << endl;
-	// }
-
-	
-
 
 	vector<int> nodes = sortandmerge(n);
 	
 	vector<VectorXf> printed = simulate(n);
 	float step = n.step;
-	//cout << step << endl;
 
 	cout << "time" <<  ',';
 
