@@ -78,6 +78,9 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 
 
 
+
+
+
 	for(int i = 0; i < components.size(); i++) // loop through all components in circuit
 	{
 		int node1 = components[i].nodes[0];
@@ -93,9 +96,21 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 		}
 		else if(components[i].flavour == 'C')
 		{
+			if(time == 0)
+			{
+				components[i].prevCurrent = 0;
+			}
 			value = (step * components[i].prevCurrent)/components[i].value;
 			// cout << "cap val: " << value << endl;
-			// cout << "prevCurrent: " << components[i].prevCurrent << endl;
+			// cout << "prevCurrent: " << netw.parts[i].prevCurrent << endl;
+		}
+		else if(components[i].flavour == 'C')
+		{
+			if(time == 0)
+			{
+				components[i].prevVoltage = 0;
+			}
+			value = (step * components[i].prevCurrent)/components[i].value;
 		}
 		else
 		{
@@ -122,7 +137,7 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 				matrixA(node0 -1, node1 -1) += -1/value;	//since G12 = G21 
 			}
 		}
-		else if((components[i].flavour == 'I') || (components[i].flavour == 'J')) 
+		else if((components[i].flavour == 'I') || (components[i].flavour == 'J') || (components[i].flavour == 'L') ) 
 		{
 			if(node1 != 0)
 			{
@@ -234,21 +249,6 @@ VectorXf solmatrix(Network netw, float time)
 	VectorXf volvec = incondmat * curvec;
 	// cout << volvec << endl;
 
-	int group2Count = netw.voltageCount + netw.capacitorCount;
-
-	int nodes = sortandmerge(netw).size();
-	int index = nodes-1;
-
-	for(int i = 0; i < netw.parts.size(); i++ )
-	{
-		if(netw.parts[i].flavour == 'C')
-		{
-			index++;
-			netw.parts[i].prevCurrent = volvec(index);
-			//cout << "volvec index: " << volvec(index) << endl;
-		}
-	}
-
 	return volvec;
 }
 
@@ -308,13 +308,30 @@ vector<VectorXf> simulate(Network netw)
 	for(float i = 0; i <= stop; i += step)
 	{
 		VectorXf volvec = solmatrix(netw,i);
-
-
+		// cout << volvec.size() << endl;
 
 		int group2Count = netw.voltageCount + netw.capacitorCount;
+		// cout << group2Count << endl;
 
 		int nodes = sortandmerge(netw).size();
-		int index = nodes-1;
+		// cout << nodes << endl;
+
+		int index = nodes-2;
+
+		for(int i = 0; i < netw.parts.size(); i++ )
+		{
+			if(netw.parts[i].flavour == 'C')
+			{
+				index++;
+				netw.parts[i].prevCurrent = volvec(index);
+				// cout << "prev current: " << volvec(index) << endl;
+				// cout << index << endl;
+			}
+			if((netw.parts[i].flavour == 'V')|| (netw.parts[i].flavour == 'W'))
+			{
+				index++;
+			}
+		}
 
 		output.push_back(volvec);
 		vector<float> veccur = current(netw,volvec,i);
