@@ -21,6 +21,8 @@ class Component{
     float offset;
 	float value;
 	char flavour;
+	float prevCurrent;
+	float prevVoltage;
 };
 
 class Resistor : public Component {
@@ -43,6 +45,7 @@ public:
 		nodes = no;
 		value = val;
 		flavour = 'L';
+		prevVoltage = 0;
 	}
     // float value;
 };
@@ -55,6 +58,7 @@ public:
 		nodes = no;
 		value = val;
 		flavour = 'C';
+		prevCurrent = 0;
 	}
     // float value;
 };
@@ -123,6 +127,7 @@ class Network{
 	int voltageCount;
 	int resistorCount;
 	int currentCount;
+	int capacitorCount;
 	
 };
 

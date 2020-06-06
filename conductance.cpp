@@ -58,20 +58,23 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 	vector<Component> components = netw.parts; // list of all components in circuit
 	vector<int> nodes = sortandmerge(netw); // list of all nodes in netlist
 	
-	int group2Count = netw.voltageCount;
-	//cout << "Group2Count: " << group2Count << endl;
-	//cout << "nodes.size -1: " << nodes.size() -1<< endl;
+	// cout << "capacitorCount: " << netw.capacitorCount << endl;
+	int group2Count = netw.voltageCount + netw.capacitorCount;
+	// cout << "Group2Count: " << group2Count << endl;
+	// cout << "nodes.size -1: " << nodes.size() -1<< endl;
 	int sizeOfMatrix = group2Count + nodes.size() -1;
 
 	MatrixXf matrixA(sizeOfMatrix, sizeOfMatrix); // define the conductance matrix and voltage vector
 	matrixA = MatrixXf::Zero(sizeOfMatrix, sizeOfMatrix);
-	//cout << matrixA << endl;
+	// cout << matrixA << endl;
 	VectorXf curvec(sizeOfMatrix); // define current vector
 	curvec = VectorXf::Zero(sizeOfMatrix);
-	//cout << curvec << endl;
+	// cout << curvec << endl;
 	
 	int group2Index = sizeOfMatrix - group2Count;
-	//cout << "group2Index: " << group2Index << endl;
+	// cout << "group2Index: " << group2Index << endl;
+
+	float step = netw.step;
 
 
 
@@ -80,13 +83,19 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 		int node1 = components[i].nodes[0];
 		int node0 = components[i].nodes[1];
 		float value = 0;
-		//cout << "flavour: " << components[i].flavour << endl;
+		// cout << "flavour: " << components[i].flavour << endl;
 
 		if((components[i].flavour == 'W')||(components[i].flavour == 'J'))
 		{
 			value = components[i].offset + (components[i].amplitude * sin(components[i].frequency * 2 * M_PI * time));
-			//cout << "time: " << time << endl;
-			//cout << "value: " << value << endl;
+			// cout << "time: " << time << endl;
+			// cout << "value: " << value << endl;
+		}
+		else if(components[i].flavour == 'C')
+		{
+			value = (step * components[i].prevCurrent)/components[i].value;
+			// cout << "cap val: " << value << endl;
+			// cout << "prevCurrent: " << components[i].prevCurrent << endl;
 		}
 		else
 		{
@@ -124,7 +133,7 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 				curvec(node0 - 1) += value;
 			}
 		}
-		else if(components[i].flavour == 'V'|| (components[i].flavour == 'W'))
+		else if((components[i].flavour == 'V')|| (components[i].flavour == 'W') || (components[i].flavour == 'C'))
 		{
 			if(node0 != 0)
 			{
@@ -209,7 +218,7 @@ pair<MatrixXf,VectorXf> condmatrix(Network netw, float time)
 	// 	}
 
 	// }
- 
+
 	return make_pair(matrixA, curvec);
 }
 
@@ -217,12 +226,29 @@ VectorXf solmatrix(Network netw, float time)
 {
 	pair<MatrixXf,VectorXf> evans = condmatrix(netw, time);
 	MatrixXf condmat = evans.first;
-	//cout << condmat << endl;
+	// cout << condmat << endl << endl;
 	VectorXf curvec = evans.second;
-	//cout << curvec << endl;
+	// cout << curvec << endl << endl;
 	MatrixXf incondmat = condmat.inverse();
 	//cout << incondmat << endl;
 	VectorXf volvec = incondmat * curvec;
+	// cout << volvec << endl;
+
+	int group2Count = netw.voltageCount + netw.capacitorCount;
+
+	int nodes = sortandmerge(netw).size();
+	int index = nodes-1;
+
+	for(int i = 0; i < netw.parts.size(); i++ )
+	{
+		if(netw.parts[i].flavour == 'C')
+		{
+			index++;
+			netw.parts[i].prevCurrent = volvec(index);
+			//cout << "volvec index: " << volvec(index) << endl;
+		}
+	}
+
 	return volvec;
 }
 
@@ -282,6 +308,14 @@ vector<VectorXf> simulate(Network netw)
 	for(float i = 0; i <= stop; i += step)
 	{
 		VectorXf volvec = solmatrix(netw,i);
+
+
+
+		int group2Count = netw.voltageCount + netw.capacitorCount;
+
+		int nodes = sortandmerge(netw).size();
+		int index = nodes-1;
+
 		output.push_back(volvec);
 		vector<float> veccur = current(netw,volvec,i);
 		VectorXf xfcur(veccur.size());
@@ -298,16 +332,16 @@ vector<VectorXf> simulate(Network netw)
 int main()
 {
 	Network n = parseNetwork();
-	//vector<int> output = sortandmerge(n);
-	//VectorXf lol = solmatrix(n, 0.01);
-	/*cout << lol << endl;
+	// vector<int> output = sortandmerge(n);
+	// VectorXf lol = solmatrix(n, 1);
+	// cout << lol << endl;
 
-	vector<float> woah = current(n, lol, 0.01);
+	// vector<float> woah = current(n, lol, 1);
 
-	for(int i = 0; i < woah.size(); i++)
-	{
-		cout << "current: " << woah[i] << endl;
-	}*/
+	// for(int i = 0; i < woah.size(); i++)
+	// {
+	// 	cout << "current: " << woah[i] << endl;
+	// }
 
 	
 
@@ -318,18 +352,18 @@ int main()
 	float step = n.step;
 	//cout << step << endl;
 
-	cout << "time" <<  "	";
+	cout << "time" <<  ',';
 
 	for(int i = 1; i < nodes.size(); i++)
 	{
-		cout << "V(node" << nodes[i] << ")" << "	";
+		cout << "V(node" << nodes[i] << ")" << ',';
 	}
 
 	for(int i = 0; i< n.parts.size(); i++)
 	{
 		if((n.parts[i].flavour == 'V') || (n.parts[i].flavour == 'W'))
 		{
-			cout << n.parts[i].name <<  "	";
+			cout << n.parts[i].name <<  ',';
 		}
 	}
 
@@ -337,7 +371,7 @@ int main()
 	{
 		if((n.parts[i].flavour != 'V') && (n.parts[i].flavour != 'W'))
 		{
-			cout << n.parts[i].name <<  "	";
+			cout << n.parts[i].name <<  ',';
 		}
 	}
 
@@ -348,14 +382,14 @@ int main()
 	{
 		if(i%2 == 0)
 		{
-			cout << step * i / 2 << "	";
+			cout << step * i / 2 << ',';
 		}
 		for(int a = 0; a < printed[i].size(); a++)	
 		{
 			cout << printed[i](a);
 			if(printed[i].size()-1 != a)
 			{
-				cout << "	";
+				cout << ',';
 			}
 		}
 		if(i%2)
@@ -364,7 +398,7 @@ int main()
 		}
 		else
 		{
-			cout<< "	";
+			cout<< ',';
 		}
 	}
 }

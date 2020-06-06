@@ -57,6 +57,7 @@ Network parseNetwork()
 	chad.voltageCount = 0;
 	chad.currentCount = 0;
 	chad.resistorCount = 0;
+	chad.capacitorCount = 0;
     while(end)
 	{
         line = troy();
@@ -90,6 +91,7 @@ Network parseNetwork()
 		}
 		else if (line[0][0] == 'C')
 		{
+			chad.capacitorCount += 1;
 			comp = Capacitor(line[0], inputnodes, stof(line[3]));
 			chad.parts.push_back(comp);
 		}
