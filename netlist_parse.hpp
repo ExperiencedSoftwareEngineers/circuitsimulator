@@ -47,6 +47,46 @@ vector<string> troy()
     return vector_line;
 }
 
+float cabbage(string word)
+{
+	float output;
+	char check = word[word.length()-1];
+	if(check == 'p')
+	{
+		output = stof(word.substr(0,(word.length())-1)) * pow(10.0,-12.0);
+	}
+	else if(check == 'n')
+	{
+		output = stof(word.substr(0,(word.length())-1)) * pow(10.0,-9.0);
+	}
+	else if(check == 'u')
+	{
+		output = stof(word.substr(0,(word.length())-1)) * pow(10.0,-6.0);
+	}
+	else if(check == 'm')
+	{
+		output = stof(word.substr(0,(word.length())-1)) * pow(10.0,-3.0);
+	}
+	else if(check == 'k')
+	{
+		output = stof(word.substr(0,(word.length())-1)) * pow(10.0,3.0);
+	}
+	else if(check == 'g')
+	{
+		output = stof(word.substr(0,(word.length())-3)) * pow(10.0,6.0);
+	}
+	else if(check == 'G')
+	{
+		output = stof(word.substr(0,(word.length())-3)) * pow(10.0,9.0);
+	}
+	else
+	{
+		output = stof(word);
+	}	
+	cout << output << endl;
+	return output;
+}
+
 Network parseNetwork()
 {
     vector<string> line;
@@ -79,20 +119,20 @@ Network parseNetwork()
 
 		if (line[0][0] == 'R')
 		{		
-			comp = Resistor(line[0], inputnodes, stof(line[3]));
+			comp = Resistor(line[0], inputnodes, cabbage(line[3]));
 			chad.parts.push_back(comp);
 			chad.resistorCount += 1;
 			//cout << "parse Resistor count: " << chad.resistorCount << endl;
 		}
 		else if (line[0][0] == 'L')
 		{
-			comp = Inductor(line[0], inputnodes, stof(line[3]));
+			comp = Inductor(line[0], inputnodes, cabbage(line[3]));
 			chad.parts.push_back(comp);
 		}
 		else if (line[0][0] == 'C')
 		{
 			chad.capacitorCount += 1;
-			comp = Capacitor(line[0], inputnodes, stof(line[3]));
+			comp = Capacitor(line[0], inputnodes, cabbage(line[3]));
 			chad.parts.push_back(comp);
 		}
 		else if (line[0][0] == 'V')
@@ -102,11 +142,11 @@ Network parseNetwork()
 
 			if(line[3][0]=='S')
 			{
-			comp = VoltageAC(line[0], inputnodes, stof(line[3].substr(5)), stof(line[4]), stof(line[5].substr(0,(line[5].length())-1)));
+			comp = VoltageAC(line[0], inputnodes, cabbage(line[3].substr(5)), cabbage(line[4]), cabbage(line[5].substr(0,(line[5].length())-1)));
 			}
 			else
 			{
-			comp = VoltageDC(line[0], inputnodes, stof(line[3]));
+			comp = VoltageDC(line[0], inputnodes, cabbage(line[3]));
 			}
 			chad.parts.push_back(comp);
 
@@ -117,18 +157,18 @@ Network parseNetwork()
 			//cout << "current Count: " << chad.currentCount << endl;
 			if(line[3][0]=='S')
 			{
-			comp = CurrentAC(line[0], inputnodes, stof(line[3].substr(5)), stof(line[4]), stof(line[5].substr(0,(line[5].length())-1)));
+			comp = CurrentAC(line[0], inputnodes, cabbage(line[3].substr(5)), cabbage(line[4]), cabbage(line[5].substr(0,(line[5].length())-1)));
 			}
 			else
 			{
-			comp = CurrentDC(line[0], inputnodes, stof(line[3]));
+			comp = CurrentDC(line[0], inputnodes, cabbage(line[3]));
 			}
 			chad.parts.push_back(comp);
 		}
 		else if (line[0] == ".tran")
 		{
-			chad.stop = stof(line[2]);
-			chad.step = stof(line[4]);
+			chad.stop = cabbage(line[2]);
+			chad.step = cabbage(line[4]);
 		}
 		else if ((line[0]==".end")||(cin.fail()))
 		{

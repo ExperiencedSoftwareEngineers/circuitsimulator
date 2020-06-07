@@ -303,7 +303,7 @@ int main()
 
 	for(int i = 0; i< n.parts.size(); i++)
 	{
-		if((n.parts[i].flavour == 'V') || (n.parts[i].flavour == 'W'))
+		if((n.parts[i].flavour == 'V') || (n.parts[i].flavour == 'W') || (n.parts[i].flavour == 'C'))
 		{
 			cout << n.parts[i].name <<  ',';
 		}
@@ -311,7 +311,7 @@ int main()
 
 	for(int i = 0; i< n.parts.size(); i++)
 	{
-		if((n.parts[i].flavour != 'V') && (n.parts[i].flavour != 'W'))
+		if((n.parts[i].flavour != 'V') && (n.parts[i].flavour != 'W') && (n.parts[i].flavour != 'C'))
 		{
 			cout << n.parts[i].name <<  ',';
 		}
