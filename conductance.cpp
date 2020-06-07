@@ -289,6 +289,26 @@ vector<VectorXf> simulate(Network &netw)
 			{
 				index++;
 			}
+			if(netw.parts[i].flavour == 'L')
+			{
+				int node1 = netw.parts[i].nodes[1];
+				int node0 = netw.parts[i].nodes[0];
+
+
+				if(node0 == 0)
+				{
+					netw.parts[i].prevVoltage = volvec[node1 - 1];
+				}
+				else if(node1 == 0)
+				{
+					netw.parts[i].prevVoltage = -1 * volvec[node0 - 1];
+				}
+				else
+				{
+					netw.parts[i].prevVoltage = volvec[node1 - 1] - volvec[node0 - 1];
+				}
+				cout << "prevVOltage: " << netw.parts[i].prevVoltage << endl;
+			}
 		}
 
 		output.push_back(volvec);
