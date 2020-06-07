@@ -134,7 +134,22 @@ class Network{
 };
 
 //not compulsory bc it's *"advanced"*
-class Diode : public Component {};
+class Diode : public Component {
+
+	float Vt;
+	double Is;
+
+	Diode(string na, vector<int> no)
+	{
+		name = na;
+		nodes = no;
+		Vt = 0.7;
+		flavour = 'D';
+		Is = 0.0000000000000252;
+	}
+};
+
+
 class Transistor : public Component {};
 
 #endif
