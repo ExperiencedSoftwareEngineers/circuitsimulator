@@ -58,24 +58,17 @@ pair<MatrixXf,VectorXf> condmatrix(Network &netw, float time)
 	vector<Component> components = netw.parts; // list of all components in circuit
 	vector<int> nodes = sortandmerge(netw); // list of all nodes in netlist
 	
-	// cout << "capacitorCount: " << netw.capacitorCount << endl;
 	int group2Count = netw.voltageCount + netw.capacitorCount;
-	// cout << "Group2Count: " << group2Count << endl;
-	// cout << "nodes.size -1: " << nodes.size() -1<< endl;
 	int sizeOfMatrix = group2Count + nodes.size() -1;
 
 	MatrixXf matrixA(sizeOfMatrix, sizeOfMatrix); // define the conductance matrix and voltage vector
 	matrixA = MatrixXf::Zero(sizeOfMatrix, sizeOfMatrix);
-	// cout << matrixA << endl;
 	VectorXf curvec(sizeOfMatrix); // define current vector
 	curvec = VectorXf::Zero(sizeOfMatrix);
-	// cout << curvec << endl;
 	
 	int group2Index = sizeOfMatrix - group2Count;
-	// cout << "group2Index: " << group2Index << endl;
 
 	float step = netw.step;
-	//cout << "network step: " << netw.step << endl;
 
 
 	for(int i = 0; i < components.size(); i++) // loop through all components in circuit
@@ -83,7 +76,6 @@ pair<MatrixXf,VectorXf> condmatrix(Network &netw, float time)
 		int node1 = components[i].nodes[0];
 		int node0 = components[i].nodes[1];
 		float value = 0;
-		// cout << "flavour: " << components[i].flavour << endl;
 
 		if((components[i].flavour == 'W')||(components[i].flavour == 'J'))
 		{
@@ -113,14 +105,14 @@ pair<MatrixXf,VectorXf> condmatrix(Network &netw, float time)
 			{
 				components[i].prevVoltage = 0;
 				components[i].lastValue = 0;
-				//cout << "prevCurrent condmatrix set zero: " << netw.parts[i].prevCurrent << endl;
+				//cout << "prevVoltage condmatrix set zero: " << netw.parts[i].prevCurrent << endl;
 
 			}
 			value = (step * netw.parts[i].prevVoltage)/(netw.parts[i].value) + netw.parts[i].lastValue;
 			//cout << "before update last value: " << netw.parts[i].lastValue << endl;
 			netw.parts[i].lastValue = value;
-			//cout << "lastValue: " << netw.parts[i].lastValue << endl;
-			//cout << "prevCurrent condmatrix: " << netw.parts[i].prevCurrent << endl;
+			//cout << "lastValue eqv current: " << netw.parts[i].lastValue << endl;
+			//cout << "prevVoltage condmatrix: " << netw.parts[i].prevVoltage << endl;
 		}
 		else
 		{
@@ -152,6 +144,8 @@ pair<MatrixXf,VectorXf> condmatrix(Network &netw, float time)
 			if(node1 != 0)
 			{
 				curvec(node1 - 1) += -value; //defined +ve current as flowing from node0 to node1
+				//cout << "node0: " << node0 << endl;
+				//cout << "node1: " << node1 << endl;
 			}
 			if(node0 != 0)
 			{
@@ -192,7 +186,7 @@ VectorXf solmatrix(Network &netw, float time)
 	MatrixXf condmat = evans.first;
 	//cout << "condmat: " << endl << condmat << endl << endl;
 	VectorXf curvec = evans.second;
-	//cout << "curvec: " << curvec << endl << endl;
+	//cout << "curvec: " <<endl<< curvec << endl << endl;
 	MatrixXf incondmat = condmat.inverse();
 	//cout << incondmat << endl;
 	VectorXf volvec = incondmat * curvec;
@@ -297,17 +291,17 @@ vector<VectorXf> simulate(Network &netw)
 
 				if(node0 == 0)
 				{
-					netw.parts[i].prevVoltage = volvec[node1 - 1];
+					netw.parts[i].prevVoltage = -1 * volvec[node1 - 1];
 				}
 				else if(node1 == 0)
 				{
-					netw.parts[i].prevVoltage = -1 * volvec[node0 - 1];
+					netw.parts[i].prevVoltage =  volvec[node0 - 1];
 				}
 				else
 				{
-					netw.parts[i].prevVoltage = volvec[node1 - 1] - volvec[node0 - 1];
+					netw.parts[i].prevVoltage = volvec[node0 - 1] - volvec[node1 - 1];
 				}
-				cout << "prevVOltage: " << netw.parts[i].prevVoltage << endl;
+				//cout << "prevVOltage: " << netw.parts[i].prevVoltage << endl;
 			}
 		}
 
