@@ -106,6 +106,22 @@ pair<MatrixXf,VectorXf> condmatrix(Network &netw, float time)
 			//cout << "lastValue: " << netw.parts[i].lastValue << endl;
 			//cout << "prevCurrent condmatrix: " << netw.parts[i].prevCurrent << endl;
 		}
+		
+		else if(components[i].flavour == 'L')
+		{
+			if(time == 0)
+			{
+				components[i].prevVoltage = 0;
+				components[i].lastValue = 0;
+				//cout << "prevCurrent condmatrix set zero: " << netw.parts[i].prevCurrent << endl;
+
+			}
+			value = (step * netw.parts[i].prevVoltage)/(netw.parts[i].value) + netw.parts[i].lastValue;
+			//cout << "before update last value: " << netw.parts[i].lastValue << endl;
+			netw.parts[i].lastValue = value;
+			//cout << "lastValue: " << netw.parts[i].lastValue << endl;
+			//cout << "prevCurrent condmatrix: " << netw.parts[i].prevCurrent << endl;
+		}
 		else
 		{
 			value = components[i].value; //for resistors, inductors and dc sources
@@ -206,6 +222,10 @@ vector<float> current(Network &netw, VectorXf volvec, float time)
 			value = components[i].offset + (components[i].amplitude * sin(components[i].frequency * 2* M_PI* time));
 			//cout << "value: " << value << endl;
 		}
+		else if(components[i].flavour == 'L')
+		{
+			value = components[i].lastValue;
+		}
 		else
 		{
 			value = components[i].value; //for resistors, inductors, capacitors and dc sources
@@ -226,7 +246,7 @@ vector<float> current(Network &netw, VectorXf volvec, float time)
 				output.push_back((volvec[node1 - 1] - volvec[node0 - 1]) / value);
 			}
 		}
-		if((components[i].flavour == 'I')||(components[i].flavour == 'J'))
+		if((components[i].flavour == 'I')||(components[i].flavour == 'J')||(components[i].flavour == 'L'))
 		{
 				output.push_back(value);
 		}

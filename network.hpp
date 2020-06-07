@@ -46,7 +46,7 @@ public:
 		nodes = no;
 		value = val;
 		flavour = 'L';
-		prevVoltage;
+		prevVoltage = 0;
 	}
     // float value;
 };
