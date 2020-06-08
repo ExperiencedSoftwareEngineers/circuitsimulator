@@ -76,6 +76,26 @@ pair<MatrixXf,VectorXf> condmatrix(Network &netw, float time)
 		int node1 = components[i].nodes[0];
 		int node0 = components[i].nodes[1];
 		float value = 0;
+		// int diodeCount = 0;
+
+		// if(components[i].flavour == 'D')
+		// {	
+		// 	diodeCount++;
+		// 	float initVd = 0.9;
+		// 	pair<float,float> result = newtonRhapson(initVd, netw, netw.parts[i], time, i)
+
+		// 	float Geq = result.first;
+		// 	float Ieq = result.second;
+
+		// 	resist = Resistor("Req"+diodeCount, netw.parts[i].nodes, Geq);
+		// 	currentSource = CurrentDC("Ieq"+diodeCount, netw.parts[i].nodes, Ieq);
+
+		// 	netw.parts.push_back(currentSource);
+		// 	netw.parts.push_back(resist);
+
+		// 	netw.parts.erase(vec.begin() + i);//delete diode
+		// }
+
 
 		if((components[i].flavour == 'W')||(components[i].flavour == 'J'))
 		{
@@ -129,6 +149,7 @@ pair<MatrixXf,VectorXf> condmatrix(Network &netw, float time)
 			if(node1 != 0)								 //of G for the diagonal will be correct
 			{
 				matrixA(node1 - 1, node1 -1) += 1/value; 
+				cout << components[i].name << endl;
 			}
 
 			//off diagonal, conductance between nodes
@@ -179,24 +200,109 @@ pair<MatrixXf,VectorXf> condmatrix(Network &netw, float time)
 }
 
 
-
 VectorXf solmatrix(Network &netw, float time)
 {
 	pair<MatrixXf,VectorXf> evans = condmatrix(netw, time);
 	MatrixXf condmat = evans.first;
-	//cout << "condmat: " << endl << condmat << endl << endl;
+	cout << "condmat: " << endl << condmat << endl << endl;
 	VectorXf curvec = evans.second;
-	//cout << "curvec: " <<endl<< curvec << endl << endl;
+	cout << "curvec: " <<endl<< curvec << endl << endl;
 	MatrixXf incondmat = condmat.inverse();
 	//cout << incondmat << endl;
 	VectorXf volvec = incondmat * curvec;
-	//cout << "sol: " << endl<< volvec << endl << endl;
+	cout << "sol: " << endl<< volvec << endl << endl;
 
 
 	return volvec;
 }
 
+pair<float, float> newtonRhapson(float initVd, Network netw, Component diode, float time, int i) //pass netw by value as want copy of netw
+{
+	float Id, Geq, currentDifference, voltageDifference;
+	float Is = diode.Is;
+	float Vt = diode.Vt;
+	float Vd = initVd;
+	Component resist;
+	Component currentSource;
+	VectorXf volvec;
+	float oldVd = 0;
+	float oldIeq = 0;
+	float Ieq = 0;
+	double currentLimit;
+	double voltageLimit;
 
+	int node1 = diode.nodes[0];
+	int node0 = diode.nodes[1];
+
+	vector<int> nodes = diode.nodes;
+
+	//To Do: create copy of netw and remove diode from netw.parts
+
+	netw.parts.erase(netw.parts.begin() + i);
+
+	while((currentDifference >= currentLimit) || (voltageDifference >= voltageLimit))
+	{
+		oldIeq = Ieq;
+
+		Id = Is * (exp (Vd/Vt) -1);
+
+		Geq = Is/Vt * exp(Vd/Vt); //slope of tangent at op point
+		Ieq = Id - (Geq * Vd);  // point where tangent meets y axis
+
+		cout << "Geq: " << Geq << endl;
+		cout << "Ieq: " << Ieq << endl;
+
+		if(oldIeq != 0)
+		{
+			netw.parts.erase(netw.parts.end() -2, netw.parts.end());  //if not first loop delete components added to netw.parts last loop
+		}
+
+		resist = Resistor("Req", nodes, 1/Geq);
+		currentSource = CurrentDC("Ieq", nodes, Ieq);
+
+		
+
+		netw.parts.push_back(currentSource);
+		netw.parts.push_back(resist);
+
+		volvec = solmatrix(netw, time);
+
+		oldVd = Vd;
+
+		if(node0 == 0)
+		{
+			Vd = volvec[node1 - 1];
+		}
+		else if(node1 == 0)
+		{
+			Vd = -1 * volvec[node0 - 1];
+		}
+		else
+		{
+			Vd = volvec[node1 - 1] - volvec[node0 - 1];
+		}
+
+		// limits
+
+		cout << "ieq:" << Ieq << endl;
+		cout << "oldIeq: " << oldIeq << endl;
+
+		voltageDifference = abs(Vd - oldVd);
+		currentDifference = abs(Ieq - oldIeq);
+
+		cout << "currentDifference: " << currentDifference << endl;
+		cout << "voltageDifference: " << voltageDifference << endl;
+
+		currentLimit = 0.01 * currentDifference + 1e-3;
+		voltageLimit = 0.01 * voltageDifference + 1e-3;
+
+		cout << "currentLimit: " << currentLimit << endl;
+		cout << "voltageLimit: " << voltageLimit << endl;
+
+	}
+
+	return make_pair(Geq, Ieq);
+}
 
 vector<float> current(Network &netw, VectorXf volvec, float time)
 {
@@ -259,6 +365,37 @@ vector<VectorXf> simulate(Network &netw)
 	float step = netw.step;
 	for(float i = 0; i <= stop; i += step)
 	{
+	
+		int diodeCount = 0;
+
+		for(int z = 0; z < netw.parts.size(); z++ )
+		{
+
+			if(netw.parts[z].flavour == 'D')
+			{	
+				diodeCount++;
+				float initVd = 0.9;
+				pair<float,float> result = newtonRhapson(initVd, netw, netw.parts[z], i*step, z);
+
+				float Geq = result.first;
+				float Ieq = result.second;
+				
+				if(i != 0)
+				{
+					netw.parts.erase(netw.parts.end() -2, netw.parts.end());  //if not first loop delete components added to netw.parts last loop
+				}
+
+				Component resist = Resistor("RReq"+diodeCount, netw.parts[z].nodes, 1/Geq);
+				Component currentSource = CurrentDC("IIeq"+diodeCount, netw.parts[z].nodes, Ieq);
+
+				netw.parts.push_back(currentSource);
+				netw.parts.push_back(resist);
+
+				//netw.parts.erase(netw.parts.begin() + z);//delete diode
+			}
+
+		}
+		
 		VectorXf volvec = solmatrix(netw,i);
 		// cout << volvec.size() << endl;
 
@@ -267,39 +404,39 @@ vector<VectorXf> simulate(Network &netw)
 
 		int nodes = sortandmerge(netw).size();
 		// cout << nodes << endl;
-
 		int index = nodes-2;
 
-		for(int i = 0; i < netw.parts.size(); i++ )
+		for(int z = 0; z < netw.parts.size(); z++ )
 		{
-			if(netw.parts[i].flavour == 'C')
+
+			if(netw.parts[z].flavour == 'C')
 			{
 				index++;
-				netw.parts[i].prevCurrent = volvec(index);
+				netw.parts[z].prevCurrent = volvec(index);
 				//cout << "prev current: " << volvec(index) << endl;
 				// cout << index << endl;
 			}
-			if((netw.parts[i].flavour == 'V')|| (netw.parts[i].flavour == 'W'))
+			if((netw.parts[z].flavour == 'V')|| (netw.parts[z].flavour == 'W'))
 			{
 				index++;
 			}
-			if(netw.parts[i].flavour == 'L')
+			if(netw.parts[z].flavour == 'L')
 			{
-				int node1 = netw.parts[i].nodes[1];
-				int node0 = netw.parts[i].nodes[0];
+				int node1 = netw.parts[z].nodes[1];
+				int node0 = netw.parts[z].nodes[0];
 
 
 				if(node0 == 0)
 				{
-					netw.parts[i].prevVoltage = -1 * volvec[node1 - 1];
+					netw.parts[z].prevVoltage = -1 * volvec[node1 - 1];
 				}
 				else if(node1 == 0)
 				{
-					netw.parts[i].prevVoltage =  volvec[node0 - 1];
+					netw.parts[z].prevVoltage =  volvec[node0 - 1];
 				}
 				else
 				{
-					netw.parts[i].prevVoltage = volvec[node0 - 1] - volvec[node1 - 1];
+					netw.parts[z].prevVoltage = volvec[node0 - 1] - volvec[node1 - 1];
 				}
 				//cout << "prevVOltage: " << netw.parts[i].prevVoltage << endl;
 			}
@@ -326,8 +463,9 @@ int main()
 	vector<int> nodes = sortandmerge(n);
 	
 	vector<VectorXf> printed = simulate(n);
-	float step = n.step;
 
+
+	float step = n.step;
 	cout << "time" <<  ',';
 
 	for(int i = 1; i < nodes.size(); i++)

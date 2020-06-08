@@ -85,7 +85,7 @@ float cabbage(string word)
 	{
 		output = stof(word);
 	}	
-	cout << output << endl;
+	// cout << output << endl;
 	return output;
 }
 

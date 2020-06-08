@@ -24,6 +24,8 @@ class Component{
 	float prevCurrent;
 	float prevVoltage;
 	float lastValue;
+	float Vt;
+	double Is;
 };
 
 class Resistor : public Component {
@@ -137,16 +139,14 @@ class Network{
 class Diode : public Component {
 	public:
 
-	float Vt;
-	double Is;
 
 	Diode(string na, vector<int> no)
 	{
 		name = na;
 		nodes = no;
-		Vt = 0.7;
+		Vt = 0.025875;
 		flavour = 'D';
-		Is = 1e-14;
+		Is = 1e-15;
 	}
 };
 
