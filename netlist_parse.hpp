@@ -12,6 +12,8 @@
 
 using namespace std;
 
+//diode netlist format D<name> <n+> <n->
+
 //Splits a single component line into individual vectors
 vector<string> troy()
 {   
@@ -163,6 +165,11 @@ Network parseNetwork()
 			{
 			comp = CurrentDC(line[0], inputnodes, cabbage(line[3]));
 			}
+			chad.parts.push_back(comp);
+		}
+		else if (line[0][0] == 'D')
+		{
+			comp = Diode(line[0], inputnodes);
 			chad.parts.push_back(comp);
 		}
 		else if (line[0] == ".tran")

@@ -135,6 +135,7 @@ class Network{
 
 //not compulsory bc it's *"advanced"*
 class Diode : public Component {
+	public:
 
 	float Vt;
 	double Is;
@@ -145,7 +146,7 @@ class Diode : public Component {
 		nodes = no;
 		Vt = 0.7;
 		flavour = 'D';
-		Is = 0.0000000000000252;
+		Is = 1e-14;
 	}
 };
 
